@@ -100,7 +100,7 @@ class EngineService:
 
     def _start_engine_process(self, port: int) -> None:
         self._process = subprocess.Popen(
-            [path.join(self._exe_dir, "FastExecuteScript.exe"), f"--remote-control-port={port}", f"--remote-control"],
+            [path.join(self._exe_dir, "FastExecuteScript.exe"), f"--remote-control-port={port}", "--remote-control"],
             cwd=self._exe_dir,
         )
 

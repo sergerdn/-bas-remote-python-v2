@@ -60,6 +60,7 @@ websockets = "^10.3"
 aiofiles = "^22.1.0"
 aiohttp = "^3.8.1"
 pyee = "^9.0.4"
+mypy = "^0.971"
 
 [tool.poetry.group.dev.dependencies]
 twine = "^4.0.1"
