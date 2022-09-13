@@ -49,7 +49,7 @@ class BasRunner:
         result = await self._client.send_async(
             "run_task", {"params": json.dumps(params if params else {}), "function_name": name, "thread_id": self.id}
         )
-        response = Response.from_json(result) # type: ignore
+        response = Response.from_json(result)  # type: ignore
         if not response.success:
             exception = FunctionError(response.message)
             self._future.set_exception(exception)

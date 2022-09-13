@@ -46,7 +46,7 @@ class SocketService:
     def _process_data(self, data: str) -> None:
         buffer = (self._buffer + data).split(SEPARATOR)
         for message in [item for item in buffer if item]:
-            unpacked = Message.from_json(message) # type: ignore
+            unpacked = Message.from_json(message)  # type: ignore
             self._emit("message_received", unpacked)
         self._buffer = buffer.pop()
 
