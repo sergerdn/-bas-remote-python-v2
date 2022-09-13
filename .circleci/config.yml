@@ -287,7 +287,7 @@ workflows:
                 command: echo 'export PATH="C:\Python37\:${PATH}"' >> ${BASH_ENV}
                 name: Add python to $PATH
             - run:
-                command: python --version
+                command: choco list python -lo && python --version
                 name: Test python installed
             - run:
                 command: curl -sSL https://install.python-poetry.org | python -
