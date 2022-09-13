@@ -272,7 +272,7 @@ workflows:
                 command: choco upgrade chocolatey -y
                 name: Upgrade  choco
             - run:
-                command: choco uninstall python --force -y
+                command: choco uninstall python3 --force -y
                 name: Uninstall default python
             - run:
                 command: choco install python --version=3.7.9 --allow-downgrade --force -y
