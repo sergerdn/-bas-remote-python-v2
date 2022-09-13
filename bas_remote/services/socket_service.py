@@ -1,15 +1,12 @@
 import asyncio
 
 from websockets import WebSocketClientProtocol, connect
-from websockets.exceptions import (
-    ConnectionClosedError,
-    ConnectionClosedOK
-)
+from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 
 from bas_remote.errors import SocketNotConnectedError
 from bas_remote.types import Message
 
-SEPARATOR = '---Message--End---'
+SEPARATOR = "---Message--End---"
 
 
 class SocketService:
@@ -17,7 +14,7 @@ class SocketService:
 
     _socket: WebSocketClientProtocol = None
 
-    _buffer: str = ''
+    _buffer: str = ""
 
     def __init__(self, client):
         """Create an instance of SocketService class."""
@@ -33,7 +30,7 @@ class SocketService:
         attempt = 1
         while not self.is_connected:
             try:
-                self._socket = await connect(f'ws://127.0.0.1:{port}', open_timeout=None)
+                self._socket = await connect(f"ws://127.0.0.1:{port}", open_timeout=None)
             except ConnectionRefusedError:
                 if attempt == 60:
                     raise SocketNotConnectedError()
@@ -49,17 +46,17 @@ class SocketService:
         buffer = (self._buffer + data).split(SEPARATOR)
         for message in [item for item in buffer if item]:
             unpacked = Message.from_json(message)
-            self._emit('message_received', unpacked)
+            self._emit("message_received", unpacked)
         self._buffer = buffer.pop()
 
     def _closed(self) -> None:
         """Function that is called when the connection is closed."""
-        self._emit('socket_close')
+        self._emit("socket_close")
         self._loop.create_task(self.close())
 
     def _opened(self) -> None:
         """Function that is called when the connection is opened."""
-        self._emit('socket_open')
+        self._emit("socket_open")
         self._loop.create_task(self.listen())
 
     async def listen(self) -> None:
@@ -76,7 +73,7 @@ class SocketService:
     async def send(self, message: Message) -> int:
         packet = message.to_json() + SEPARATOR
         await self._socket.send(packet)
-        self._emit('message_sent', message)
+        self._emit("message_sent", message)
         return message.id_
 
     async def close(self) -> None:
@@ -86,4 +83,4 @@ class SocketService:
         await self._socket.close()
 
 
-__all__ = ['SocketService']
+__all__ = ["SocketService"]

@@ -44,8 +44,8 @@ class BasRemoteClient(AsyncIOEventEmitter):
         self._engine = EngineService(self)
         self._socket = SocketService(self)
 
-        self.on('message_received', self._on_message_received)
-        self.on('socket_open', self._on_socket_open)
+        self.on("message_received", self._on_message_received)
+        self.on("socket_open", self._on_socket_open)
 
     @property
     def is_started(self):
@@ -59,33 +59,33 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
         await self._engine.start(port)
         await self._socket.start(port)
-        await asyncio.wait_for(
-            fut=self._future,
-            timeout=60
-        )
+        await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_message_received(self, message: Message) -> None:
-        if message.type_ == 'initialize':
-            await self._send('accept_resources', {'-bas-empty-script-': True})
-        elif message.type_ == 'thread_start' and not self._future.done():
+        if message.type_ == "initialize":
+            await self._send("accept_resources", {"-bas-empty-script-": True})
+        elif message.type_ == "thread_start" and not self._future.done():
             self._future.set_result(True)
             self._is_started = True
-        elif message.type_ == 'message' and not self._future.done():
+        elif message.type_ == "message" and not self._future.done():
             self._future.set_exception(AuthenticationError())
             self._is_started = False
         elif message.async_ and message.id_:
             callback = self._requests.pop(message.id_)
-            if message.type_ == 'get_global_variable':
+            if message.type_ == "get_global_variable":
                 callback(json.loads(message.data))
             else:
                 callback(message.data)
 
     async def _on_socket_open(self) -> None:
-        await self._send('remote_control_data', {
-            'script': self.options.script_name,
-            'password': self.options.password,
-            'login': self.options.login,
-        })
+        await self._send(
+            "remote_control_data",
+            {
+                "script": self.options.script_name,
+                "password": self.options.password,
+                "login": self.options.login,
+            },
+        )
 
     def run_function(self, function_name: str, function_params: Optional[Dict] = None) -> BasFunction:
         """Call the BAS function asynchronously.
@@ -146,7 +146,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         Args:
             thread_id (int): Thread identifier.
         """
-        await self.send('start_thread', {'thread_id': thread_id})
+        await self.send("start_thread", {"thread_id": thread_id})
 
     async def stop_thread(self, thread_id: int) -> None:
         """Stop thread with specified id.
@@ -154,7 +154,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         Args:
             thread_id (int): Thread identifier.
         """
-        await self.send('stop_thread', {'thread_id': thread_id})
+        await self.send("stop_thread", {"thread_id": thread_id})
 
     def create_thread(self) -> BasThread:
         """Create new BAS thread object.
@@ -171,4 +171,4 @@ class BasRemoteClient(AsyncIOEventEmitter):
         self._is_started = False
 
 
-__all__ = ['BasRemoteClient']
+__all__ = ["BasRemoteClient"]

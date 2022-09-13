@@ -12,7 +12,7 @@ from filelock import FileLock, Timeout
 from bas_remote.errors import ScriptNotExistError, ScriptNotSupportedError
 from bas_remote.types import Script
 
-ENDPOINT = 'https://bablosoft.com'
+END_POINT = "https://bablosoft.com"
 
 
 class EngineService:
@@ -44,11 +44,11 @@ class EngineService:
             port (int):
                 Selected port number.
         """
-        arch = 64 if machine().endswith('64') else 32
-        zip_name = f'FastExecuteScriptProtected.x{arch}'
-        url_name = f'FastExecuteScriptProtected{arch}'
+        arch = 64 if machine().endswith("64") else 32
+        zip_name = f"FastExecuteScriptProtected.x{arch}"
+        url_name = f"FastExecuteScriptProtected{arch}"
 
-        zip_path = path.join(self._zip_dir, f'{zip_name}.zip')
+        zip_path = path.join(self._zip_dir, f"{zip_name}.zip")
 
         if not path.exists(self._zip_dir):
             makedirs(self._zip_dir)
@@ -62,7 +62,7 @@ class EngineService:
         self._clear_run_directory()
 
     async def initialize(self):
-        url = f'{ENDPOINT}/scripts/{self._script_name}/properties'
+        url = f"{END_POINT}/scripts/{self._script_name}/properties"
 
         async with ClientSession(loop=self._loop) as session:
             async with session.get(url) as response:
@@ -78,11 +78,11 @@ class EngineService:
         self._exe_dir = path.join(self._script_dir, script.hash[0:5])
 
     async def _download_executable(self, zip_path: str, zip_name: str, url_name: str) -> None:
-        url = f"{ENDPOINT}/distr/{url_name}/{path.basename(self._zip_dir)}/{zip_name}.zip"
+        url = f"{END_POINT}/distr/{url_name}/{path.basename(self._zip_dir)}/{zip_name}.zip"
 
         async with ClientSession(loop=self._loop) as session:
             async with session.get(url) as response:
-                async with open(zip_path, 'wb') as file:
+                async with open(zip_path, "wb") as file:
                     while True:
                         chunk = await response.content.read(1024 * 16)
                         if not chunk:
@@ -91,33 +91,32 @@ class EngineService:
                     return await response.release()
 
     async def _extract_executable(self, zip_path: str) -> None:
-        with ZipFile(zip_path, 'r') as file:
+        with ZipFile(zip_path, "r") as file:
+
             async def task(name, zip_file: ZipFile):
                 zip_file.extract(name, self._exe_dir, None)
 
             await asyncio.wait([task(name, file) for name in file.namelist()])
 
     def _start_engine_process(self, port: int) -> None:
-        self._process = subprocess.Popen([
-            path.join(self._exe_dir, 'FastExecuteScript.exe'),
-            f'--remote-control-port={port}',
-            f'--remote-control'
-        ], cwd=self._exe_dir)
+        self._process = subprocess.Popen(
+            [path.join(self._exe_dir, "FastExecuteScript.exe"), f"--remote-control-port={port}", f"--remote-control"],
+            cwd=self._exe_dir,
+        )
 
         lock = self._get_lock_path()
         self._lock = FileLock(lock)
         self._lock.acquire()
 
     def _clear_run_directory(self) -> None:
-        for dir_path in [name for name in listdir(self._script_dir)
-                         if path.isfile(name)]:
+        for dir_path in [name for name in listdir(self._script_dir) if path.isfile(name)]:
             dir_path = path.join(self._script_dir, dir_path)
             lock_path = self._get_lock_path(dir_path)
             if not is_locked(lock_path):
                 rmtree(dir_path)
 
     def _get_lock_path(self, dir_path=None) -> str:
-        return path.join(dir_path or self._exe_dir, '.lock')
+        return path.join(dir_path or self._exe_dir, ".lock")
 
     async def close(self) -> None:
         """Close the engine service."""
@@ -134,4 +133,4 @@ def is_locked(lock_path):
         return True
 
 
-__all__ = ['EngineService']
+__all__ = ["EngineService"]

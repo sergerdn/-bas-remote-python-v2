@@ -54,4 +54,4 @@ class BasThread(BasRunner):
         return self._is_running
 
 
-__all__ = ['BasThread']
+__all__ = ["BasThread"]

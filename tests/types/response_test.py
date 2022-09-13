@@ -5,10 +5,8 @@ from bas_remote.types.response import Response
 
 class ResponseTestCase(unittest.TestCase):
     test_data = [
-        (Response(message='Hello', success=True, result=None),
-         {"Success": True, "Message": "Hello", "Result": None}),
-        (Response(message='Hello', success=False, result=None),
-         {"Success": False, "Message": "Hello", "Result": None})
+        (Response(message="Hello", success=True, result=None), {"Success": True, "Message": "Hello", "Result": None}),
+        (Response(message="Hello", success=False, result=None), {"Success": False, "Message": "Hello", "Result": None}),
     ]
 
     def test_response_from_dict(self):
@@ -26,5 +24,5 @@ class ResponseTestCase(unittest.TestCase):
                 self.assertEqual(response.to_dict(), dict_)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

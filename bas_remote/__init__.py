@@ -4,19 +4,19 @@ from .options import Options
 from .types import Message
 
 __all__ = [
-    'BasRemoteClient',
-    'SocketNotConnectedError',
-    'ScriptNotSupportedError',
-    'ClientNotStartedError',
-    'ScriptNotExistError',
-    'AuthenticationError',
-    'AlreadyRunningError',
-    'FunctionError',
-    'BasError',
-    'Options',
-    'Message'
+    "BasRemoteClient",
+    "SocketNotConnectedError",
+    "ScriptNotSupportedError",
+    "ClientNotStartedError",
+    "ScriptNotExistError",
+    "AuthenticationError",
+    "AlreadyRunningError",
+    "FunctionError",
+    "BasError",
+    "Options",
+    "Message",
 ]
 
-__author__ = 'CheshireCaat'
-__version__ = '1.3'
-__license__ = 'MIT'
+__author__ = "CheshireCaat"
+__version__ = "1.3"
+__license__ = "MIT"

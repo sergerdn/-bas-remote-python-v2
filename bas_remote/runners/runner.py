@@ -46,11 +46,9 @@ class BasRunner:
             name (str): BAS function name as string.
             params (dict, optional): BAS function arguments list.
         """
-        result = await self._client.send_async('run_task', {
-            'params': json.dumps(params if params else {}),
-            'function_name': name,
-            'thread_id': self.id
-        })
+        result = await self._client.send_async(
+            "run_task", {"params": json.dumps(params if params else {}), "function_name": name, "thread_id": self.id}
+        )
         response = Response.from_json(result)
         if not response.success:
             exception = FunctionError(response.message)
@@ -64,4 +62,4 @@ class BasRunner:
         return self._id
 
 
-__all__ = ['BasRunner']
+__all__ = ["BasRunner"]

@@ -6,7 +6,6 @@ from helpers import *
 
 
 class ThreadTestCase(BaseTest):
-
     def test_parallel_function_run(self):
         threads = create_threads(self.client)
         x, y = generate_pairs()
@@ -53,5 +52,5 @@ class ThreadTestCase(BaseTest):
         self.assertEqual(thread.id, 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

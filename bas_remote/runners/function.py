@@ -29,4 +29,4 @@ class BasFunction(BasRunner):
         await self._client.stop_thread(self.id)
 
 
-__all__ = ['BasFunction']
+__all__ = ["BasFunction"]

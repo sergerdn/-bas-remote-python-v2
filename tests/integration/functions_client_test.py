@@ -6,7 +6,6 @@ from helpers import *
 
 
 class ClientTestCase(BaseTest):
-
     def test_parallel_function_run(self):
         x, y = generate_pairs()
 
@@ -36,5 +35,5 @@ class ClientTestCase(BaseTest):
         self.assertEqual(result, x + y)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

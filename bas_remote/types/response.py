@@ -19,4 +19,4 @@ class Response:
     """Response result object."""
 
 
-__all__ = ['Response']
+__all__ = ["Response"]
