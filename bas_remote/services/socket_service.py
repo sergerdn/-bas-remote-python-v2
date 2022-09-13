@@ -1,6 +1,7 @@
 import asyncio
 
-from websockets import WebSocketClientProtocol, connect
+from websockets.legacy.client import connect
+from websockets.legacy.client import WebSocketClientProtocol
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 
 from bas_remote.errors import SocketNotConnectedError
