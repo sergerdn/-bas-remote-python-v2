@@ -275,7 +275,10 @@ workflows:
                 command: choco install python --version=3.7.9 --allow-downgrade --force -y
                 name: Install python 3.7.9
             - run:
-                command: choco pin add -n python && python --version
+                command: choco pin add -n=python --version 3.7.9
+                name: Test python installed
+            - run:
+                command: python --version
                 name: Test python installed
             - run:
                 command: curl -sSL https://install.python-poetry.org | python -
