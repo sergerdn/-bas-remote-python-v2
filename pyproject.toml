@@ -78,7 +78,7 @@ target-version = ['py37']
 include = '\.pyi?$'
 
 [tool.poetry.build]
-script = "build.py"
+#script = "build.py"
 generate-setup-file = false
 
 [build-system]
