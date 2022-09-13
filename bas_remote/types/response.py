@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 from dataclasses_json import dataclass_json, LetterCase
 
@@ -12,7 +12,7 @@ class Response:
     success: bool = False
     """[description]"""
 
-    message: str = None
+    message: Optional[str] = None
     """Response error message."""
 
     result: Any = None

@@ -7,7 +7,7 @@ from bas_remote.types import Response
 
 
 class BasRunner:
-    _loop: AbstractEventLoop = None
+    _loop: Optional[AbstractEventLoop] = None
 
     _future: Future = None
 
