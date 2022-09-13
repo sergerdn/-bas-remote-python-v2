@@ -274,9 +274,9 @@ workflows:
             - run:
                 command: choco install python --force -y
                 name: Install default python
-            - run:
-                command: choco uninstall python3 --force -y
-                name: Uninstall default python
+#            - run:
+#                command: choco uninstall python3 --force -y
+#                name: Uninstall default python3
             - run:
                 command: choco install python --version=3.7.9 --allow-downgrade --force -y
                 name: Install python 3.7.9
