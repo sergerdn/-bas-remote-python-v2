@@ -1,7 +1,10 @@
 import asyncio
+import os.path
 import unittest
 
 from bas_remote import BasRemoteClient, Options
+from tests import ABS_PATH, test_remote_script_password
+from tests import test_remote_script_name, test_remote_script_user
 
 
 class BaseTest(unittest.TestCase):
@@ -12,7 +15,18 @@ class BaseTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.loop = asyncio.new_event_loop()
-        cls.options = Options(working_dir="../../bas-remote-app", script_name="TestRemoteControl")
+
+        script_name = test_remote_script_name
+        remote_script_user = test_remote_script_user
+        remote_script_password = test_remote_script_password
+
+        working_dir = os.path.join(ABS_PATH, ".bas-remote-app-{script_name}".format(script_name=script_name.lower()))
+        if not os.path.exists:
+            os.mkdir(working_dir)
+
+        cls.options = Options(
+            working_dir=working_dir, script_name=script_name, login=remote_script_user, password=remote_script_password
+        )
         cls.client = BasRemoteClient(cls.options, cls.loop)
         cls.loop.run_until_complete(cls.client.start())
 
