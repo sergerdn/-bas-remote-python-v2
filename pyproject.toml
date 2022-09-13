@@ -11,8 +11,12 @@ readme = "README.md"
 packages = [
     { include = "bas_remote" },
     { include = "tests" },
-    { include = "docs" },
 ]
+
+include = [
+    {path = "docs/*.png" }
+]
+
 keywords = [
     "visual-programming-language",
     "browserautomationstudio",
