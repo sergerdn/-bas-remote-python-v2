@@ -60,6 +60,7 @@ websockets = "^10.3"
 aiofiles = "^22.1.0"
 aiohttp = "^3.8.1"
 pyee = "^9.0.4"
+types-aiofiles = "^22.1.0"
 
 [tool.poetry.group.dev.dependencies]
 twine = "^4.0.1"
@@ -69,7 +70,9 @@ setuptools = "^65.3.0"
 python-dotenv = "^0.21.0"
 tox = "^3.25.1"
 tox-poetry = "^0.4.1"
+flake8-tidy-imports = "^4.8.0"
 flake8 = "^5.0.4"
+mypy = "^0.971"
 black = { git = "https://github.com/psf/black" }
 
 [tool.black]

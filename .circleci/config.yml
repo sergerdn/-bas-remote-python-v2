@@ -31,7 +31,7 @@ jobs:
           paths:
             - .venv/
       - run:
-          command: poetry run black . --check
+          command: poetry run black . --check && poetry run flake8
           name: Lint
   test-win-python310:
     # https://circleci.com/docs/configuration-reference#resourceclass

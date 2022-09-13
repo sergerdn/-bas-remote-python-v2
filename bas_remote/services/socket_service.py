@@ -1,6 +1,7 @@
 import asyncio
 
-from websockets import WebSocketClientProtocol, connect
+from websockets.legacy.client import connect
+from websockets.legacy.client import WebSocketClientProtocol
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 
 from bas_remote.errors import SocketNotConnectedError
@@ -45,7 +46,7 @@ class SocketService:
     def _process_data(self, data: str) -> None:
         buffer = (self._buffer + data).split(SEPARATOR)
         for message in [item for item in buffer if item]:
-            unpacked = Message.from_json(message)
+            unpacked = Message.from_json(message)  # type: ignore
             self._emit("message_received", unpacked)
         self._buffer = buffer.pop()
 
@@ -71,7 +72,7 @@ class SocketService:
         self._closed()
 
     async def send(self, message: Message) -> int:
-        packet = message.to_json() + SEPARATOR
+        packet = message.to_json() + SEPARATOR  # type: ignore
         await self._socket.send(packet)
         self._emit("message_sent", message)
         return message.id_

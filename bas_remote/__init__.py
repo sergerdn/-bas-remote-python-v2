@@ -1,7 +1,8 @@
-from .client import BasRemoteClient
-from .errors import *
-from .options import Options
-from .types import Message
+from bas_remote.client import BasRemoteClient
+from bas_remote.errors import BasError, SocketNotConnectedError, ScriptNotSupportedError, ClientNotStartedError
+from bas_remote.errors import ScriptNotExistError, AuthenticationError, AlreadyRunningError, FunctionError
+from bas_remote.options import Options
+from bas_remote.types import Message
 
 __all__ = [
     "BasRemoteClient",
