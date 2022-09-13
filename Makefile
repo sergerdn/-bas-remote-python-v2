@@ -21,6 +21,7 @@ clean:
 	rm -rf ./bas_remote_python.egg-info || echo ""
 	rm -rf ./.bas-remote-app-* || echo ""
 	rm -rf ./.pytest_cache || echo ""
+	rm -rf ./.mypy_cache || echo ""
 	rm -rf ./dist || echo ""
 
 build:
