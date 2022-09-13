@@ -1,7 +1,7 @@
 from random import randint
 from typing import Optional, Dict
 
-from .runner import BasRunner
+from bas_remote.runner import BasRunner
 
 
 class BasFunction(BasRunner):

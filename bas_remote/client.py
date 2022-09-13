@@ -6,11 +6,11 @@ from typing import Callable, Optional, Dict, Any
 
 from pyee.asyncio import AsyncIOEventEmitter
 
-from .errors import AuthenticationError, ClientNotStartedError
-from .options import Options
-from .runners import BasFunction, BasThread
-from .services import EngineService, SocketService
-from .types import Message
+from bas_remote.errors import AuthenticationError, ClientNotStartedError
+from bas_remote.options import Options
+from bas_remote.runners import BasFunction, BasThread
+from bas_remote.services import EngineService, SocketService
+from bas_remote.types import Message
 
 
 class BasRemoteClient(AsyncIOEventEmitter):

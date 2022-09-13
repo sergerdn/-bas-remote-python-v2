@@ -1,4 +1,4 @@
-from .client import BasRemoteClient
+from bas_remote.client import BasRemoteClient
 from bas_remote.errors import BasError, SocketNotConnectedError, ScriptNotSupportedError, ClientNotStartedError
 from bas_remote.errors import ScriptNotExistError, AuthenticationError, AlreadyRunningError, FunctionError
 from bas_remote.options import Options

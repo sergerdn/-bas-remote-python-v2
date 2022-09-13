@@ -2,7 +2,7 @@ from random import randint
 from typing import Optional, Dict
 
 from bas_remote.errors import AlreadyRunningError
-from .runner import BasRunner
+from bas_remote.runners.runner import BasRunner
 
 
 class BasThread(BasRunner):
