@@ -18,5 +18,5 @@ __all__ = [
 ]
 
 __author__ = "CheshireCaat"
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __license__ = "MIT"

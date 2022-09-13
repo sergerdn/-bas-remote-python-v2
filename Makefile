@@ -29,7 +29,7 @@ build:
 upload_pypi:
 	$(clean)
 	$(build)
-	twine upload dist/bas-remote-python-v2-2.0.0.tar.gz dist/*.whl
+	twine upload dist/*.tar.gz dist/*.whl
 
 create_requirements:
 	poetry export --without-hashes --without-urls -f requirements.txt --output requirements.txt
