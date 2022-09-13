@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bas-remote-python-v2"
-version = "2.0.0"
+version = "2.0.1"
 license = "MIT"
 description = "Python library, which allows you to automate Google Chrome browser via BAS software."
 homepage = "https://github.com/sergerdn/bas-remote-python-v2"
@@ -62,6 +62,7 @@ aiohttp = "^3.8.1"
 pyee = "^9.0.4"
 
 [tool.poetry.group.dev.dependencies]
+twine = "^4.0.1"
 pytest = "^7.1.3"
 pytest-asyncio = "^0.19.0"
 setuptools = "^65.3.0"
@@ -77,7 +78,7 @@ target-version = ['py37']
 include = '\.pyi?$'
 
 [tool.poetry.build]
-script = "build.py"
+#script = "build.py"
 generate-setup-file = false
 
 [build-system]

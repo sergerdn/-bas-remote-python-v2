@@ -26,5 +26,10 @@ build:
 	poetry build -f sdist -n
 	rm 1.0.0 || echo ""
 
+upload_pypi:
+	$(clean)
+	$(build)
+	twine upload dist/*.tar.gz dist/*.whl
+
 create_requirements:
 	poetry export --without-hashes --without-urls -f requirements.txt --output requirements.txt
