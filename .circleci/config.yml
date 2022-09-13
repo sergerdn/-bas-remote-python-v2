@@ -179,7 +179,10 @@ workflows:
                 command: choco install python --version=3.10.7 --allow-downgrade --force -y
                 name: Install python 3.10.7
             - run:
-                command: choco pin add -n python && python --version
+                command: echo 'export PATH="C:\Python310\:${PATH}"' >> ${BASH_ENV}
+                name: Add python to $PATH
+            - run:
+                command: python --version
                 name: Test python installed
             - run:
                 command: curl -sSL https://install.python-poetry.org | python -
@@ -202,6 +205,9 @@ workflows:
             - run:
                 command: choco install python --version=3.10.7 --allow-downgrade --force -y
                 name: Install python 3.10.7
+            - run:
+                command: echo 'export PATH="C:\Python310\:${PATH}"' >> ${BASH_ENV}
+                name: Add python to $PATH
             - run:
                 command: python --version
                 name: Test python installed
@@ -227,6 +233,9 @@ workflows:
                 command: choco install python --version=3.9.13 --allow-downgrade --force -y
                 name: Install python 3.9.13
             - run:
+                command: echo 'export PATH="C:\Python39\:${PATH}"' >> ${BASH_ENV}
+                name: Add python to $PATH
+            - run:
                 command: python --version
                 name: Test python installed
             - run:
@@ -251,7 +260,10 @@ workflows:
                 command: choco install python --version=3.8.10 --allow-downgrade --force -y
                 name: Install python 3.8.10
             - run:
-                command: choco pin add -n python && python --version
+                command: echo 'export PATH="C:\Python38\:${PATH}"' >> ${BASH_ENV}
+                name: Add python to $PATH
+            - run:
+                command: python --version
                 name: Test python installed
             - run:
                 command: curl -sSL https://install.python-poetry.org | python -
