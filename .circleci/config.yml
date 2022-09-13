@@ -284,6 +284,9 @@ workflows:
                 command: choco pin add -n=python --version 3.7.9
                 name: Pin python
             - run:
+                command: echo 'export PATH="C:\Python37\:${PATH}"' >> ${BASH_ENV}
+                name: Add python to $PATH
+            - run:
                 command: python --version
                 name: Test python installed
             - run:
