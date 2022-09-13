@@ -112,3 +112,4 @@ static_collected
 # Exclude working folder
 data/
 /.pytest_cache/
+/.bas-remote-app-*/
