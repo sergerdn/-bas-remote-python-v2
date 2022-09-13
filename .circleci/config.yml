@@ -271,18 +271,9 @@ workflows:
             - run:
                 command: choco upgrade chocolatey -y
                 name: Upgrade  choco
-#            - run:
-#                command: choco install python --force -y
-#                name: Install default python
-#            - run:
-#                command: choco uninstall python3 --force -y
-#                name: Uninstall default python3
             - run:
                 command: choco install python --version=3.7.9 --allow-downgrade --force -y
                 name: Install python 3.7.9
-#            - run:
-#                command: choco pin add -n=python --version 3.7.9
-#                name: Pin python
             - run:
                 command: echo 'export PATH="C:\Python37\:${PATH}"' >> ${BASH_ENV}
                 name: Add python to $PATH
