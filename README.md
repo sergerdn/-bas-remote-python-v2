@@ -55,7 +55,7 @@ from bas_remote import Options
 
 async def main():
     # Set script name, and optionally auth details (login, password).
-    options = Options(script_name='TestRemoteControl')
+    options = Options(script_name='TestRemoteControlV2')
 
     # Create client.
     script_client = BasRemoteClient(options)
@@ -122,8 +122,7 @@ using `options.working_dir` setting.
 
 # Project example
 
-You can use _TestRemoteControl_ project in order to test **bas-remote-python** library. It is already uploaded into the
-cloud and can be used without authentication. List of available functions:
+You can use _TestRemoteControlV2_ project in order to test **bas-remote-python** library.
 
 - `Add(X,Y)` - adds two numbers and return their sum.
 - `SetProxy(Proxy,IsSocks5)` - sets proxy for current thread. _Proxy_ param is proxy string, _IsSocks5_ is string("true"
@@ -132,7 +131,7 @@ cloud and can be used without authentication. List of available functions:
   SetProxy_ function.
 - `GoogleSearch(Query)` - performs Google query, returns result as a list of urls.
 
-Project source code can be downloaded [here](./docs/TestRemoteControl.xml)
+Project source code can be downloaded [here](./docs/TestRemoteControlV2.xml)
 
 # License
 

@@ -12,7 +12,7 @@ dotenv_path = os.path.join(ABS_PATH, "tests", ".env")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path=dotenv_path)
 
-test_remote_script_name = os.environ.get("TEST_REMOTE_SCRIPT_NAME", "TestRemoteControl")
+test_remote_script_name = os.environ.get("TEST_REMOTE_SCRIPT_NAME", "TestRemoteControlV2")
 test_remote_script_user = os.environ.get("TEST_REMOTE_SCRIPT_USER", None)
 test_remote_script_password = os.environ.get("TEST_REMOTE_SCRIPT_PASSWORD", None)
 

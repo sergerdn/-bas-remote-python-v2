@@ -8,8 +8,8 @@ from tests import test_remote_script_name, test_remote_script_user
 
 
 class BaseTest(unittest.TestCase):
+    options = None
     client = None
-
     loop = None
 
     @classmethod
