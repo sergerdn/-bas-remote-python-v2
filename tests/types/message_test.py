@@ -5,10 +5,14 @@ from bas_remote.types.message import Message
 
 class MessageTestCase(unittest.TestCase):
     test_data = [
-        (Message(id_=1, async_=True, type_='log', data='Hello'),
-         {"async": True, "type": "log", "id": 1, "data": "Hello"}),
-        (Message(id_=1, async_=False, type_='log', data='Hello'),
-         {"async": False, "type": "log", "id": 1, "data": "Hello"})
+        (
+            Message(id_=1, async_=True, type_="log", data="Hello"),
+            {"async": True, "type": "log", "id": 1, "data": "Hello"},
+        ),
+        (
+            Message(id_=1, async_=False, type_="log", data="Hello"),
+            {"async": False, "type": "log", "id": 1, "data": "Hello"},
+        ),
     ]
 
     def test_message_from_dict(self):
@@ -26,5 +30,5 @@ class MessageTestCase(unittest.TestCase):
                 self.assertEqual(message.to_dict(), dict_)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

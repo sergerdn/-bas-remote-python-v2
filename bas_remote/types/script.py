@@ -2,14 +2,14 @@ from distutils.version import StrictVersion
 
 
 class Script:
-    supported_version = '22.4.2'
+    supported_version = "22.4.2"
 
     def __init__(self, data):
         self._data = data
 
     @property
     def engine_version(self) -> str:
-        return self._data['engversion']
+        return self._data["engversion"]
 
     @property
     def is_supported(self) -> bool:
@@ -22,15 +22,15 @@ class Script:
 
     @property
     def is_exist(self) -> bool:
-        return self._data['success']
+        return self._data["success"]
 
     @property
     def is_free(self) -> bool:
-        return self._data['free']
+        return self._data["free"]
 
     @property
     def hash(self) -> str:
-        return self._data['hash']
+        return self._data["hash"]
 
 
-__all__ = ['Script']
+__all__ = ["Script"]

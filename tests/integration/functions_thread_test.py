@@ -1,12 +1,13 @@
 import unittest
 
 from bas_remote.errors import FunctionError
-from base import BaseTest
-from helpers import *
+from tests import windows_test
+from tests.integration.base import BaseTest
+from tests.integration.helpers import create_threads, generate_pairs, generate_one_pair
 
 
+@windows_test
 class ThreadTestCase(BaseTest):
-
     def test_parallel_function_run(self):
         threads = create_threads(self.client)
         x, y = generate_pairs()
@@ -28,7 +29,7 @@ class ThreadTestCase(BaseTest):
 
     def test_not_existing_function_run(self):
         thread = self.client.create_thread()
-        x, y = generate_pair()
+        x, y = generate_one_pair()
 
         with self.subTest(x=x, y=y):
             with self.assertRaises(FunctionError):
@@ -37,7 +38,7 @@ class ThreadTestCase(BaseTest):
 
     def test_function_run(self):
         thread = self.client.create_thread()
-        x, y = generate_pair()
+        x, y = generate_one_pair()
 
         result = self.run_function(thread, x, y)
         self.assertEqual(result, x + y)
@@ -53,5 +54,5 @@ class ThreadTestCase(BaseTest):
         self.assertEqual(thread.id, 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

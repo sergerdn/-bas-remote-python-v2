@@ -16,22 +16,14 @@ class Message:
     )
     """Is message async."""
 
-    type_: str = field(
-        metadata=config(
-            field_name="type"
-        )
-    )
+    type_: str = field(metadata=config(field_name="type"))
     """Message type string."""
 
-    id_: int = field(
-        metadata=config(
-            field_name="id"
-        )
-    )
+    id_: int = field(metadata=config(field_name="id"))
     """Message id number."""
 
     data: Any = None
     """Message data object."""
 
 
-__all__ = ['Message']
+__all__ = ["Message"]

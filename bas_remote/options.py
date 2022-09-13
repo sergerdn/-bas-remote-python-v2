@@ -6,16 +6,16 @@ from os import getcwd, path
 class Options:
     """Class that contains client settings."""
 
-    working_dir: str = path.join(getcwd(), 'data')
+    working_dir: str = path.join(getcwd(), "data")
     """Location of the selected working folder."""
 
-    script_name: str = ''
+    script_name: str = ""
     """Name of the selected private script."""
 
-    password: str = ''
+    password: str = ""
     """Password from a user account with access to the script."""
 
-    login: str = ''
+    login: str = ""
     """Login from a user account with access to the script."""
 
     def __post_init__(self):
@@ -26,4 +26,4 @@ class Options:
         self.working_dir = path.abspath(self.working_dir)
 
 
-__all__ = ['Options']
+__all__ = ["Options"]

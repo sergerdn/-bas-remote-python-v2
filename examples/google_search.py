@@ -5,11 +5,11 @@ from bas_remote import Options
 
 
 async def main():
-    client = BasRemoteClient(options=Options(script_name='TestRemoteControl'))
+    client = BasRemoteClient(options=Options(script_name="TestRemoteControl"))
 
     await client.start()
 
-    result = await client.run_function('GoogleSearch', {'Query': 'cats'})
+    result = await client.run_function("GoogleSearch", {"Query": "cats"})
 
     for link in result:
         print(link)
@@ -17,5 +17,5 @@ async def main():
     await client.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())
