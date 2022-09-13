@@ -1,0 +1,292 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  lint-win-python310:
+    # https://circleci.com/docs/configuration-reference#resourceclass
+    resource_class: "windows.medium"
+    machine:
+      image: "windows-server-2022-gui:current" # https://circleci.com/developer/images?imageType=machines
+      shell: bash.exe
+    steps:
+      - checkout
+      - run:
+          command: poetry config virtualenvs.in-project true
+          name: Setup poetry
+      - restore_cache:
+          name: Restore poetry package cache
+          keys:
+            - python310-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+            - python310-packages-{{ checksum "poetry.lock" }}
+            - python310-packages
+      - run:
+          command: poetry install
+          name: Install python dependencies
+      - save_cache:
+          name: Save poetry package cache
+          key: python310-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+          paths:
+            - .venv/
+      - run:
+          command: poetry run black . --check
+          name: Lint
+  test-win-python310:
+    # https://circleci.com/docs/configuration-reference#resourceclass
+    resource_class: "windows.medium"
+    machine:
+      image: "windows-server-2022-gui:current"
+      shell: bash.exe
+    steps:
+      - checkout
+      - run:
+          command: poetry config virtualenvs.in-project true
+          name: Setup poetry
+      - restore_cache:
+          name: Restore poetry package cache
+          keys:
+            - python310-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+            - python310-packages-{{ checksum "poetry.lock" }}
+            - python310-packages
+      - run:
+          command: poetry install
+          name: Install python dependencies
+      - save_cache:
+          name: Save poetry package cache
+          key: python310-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+          paths:
+            - .venv/
+      - run:
+          command: poetry run pytest tests
+          name: Run tests
+      - run:
+          command: poetry build -f wheel
+          name: Build wheel
+      - store_artifacts:
+          path: dist/
+  test-win-python39:
+    # https://circleci.com/docs/configuration-reference#resourceclass
+    resource_class: "windows.medium"
+    machine:
+      image: "windows-server-2022-gui:current"
+      shell: bash.exe
+    steps:
+      - checkout
+      - run:
+          command: poetry config virtualenvs.in-project true
+          name: Setup poetry
+      - restore_cache:
+          name: Restore poetry package cache
+          keys:
+            - python39-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+            - python39-packages-{{ checksum "poetry.lock" }}
+            - python39-packages
+      - run:
+          command: poetry install
+          name: Install python dependencies
+      - save_cache:
+          name: Save poetry package cache
+          key: python39-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+          paths:
+            - .venv/
+      - run:
+          command: poetry run pytest tests
+          name: Run tests
+      - run:
+          command: poetry build -f wheel
+          name: Build wheel
+      - store_artifacts:
+          path: dist/
+  test-win-python38:
+    # https://circleci.com/docs/configuration-reference#resourceclass
+    resource_class: "windows.medium"
+    machine:
+      image: "windows-server-2022-gui:current"
+      shell: bash.exe
+    steps:
+      - checkout
+      - run:
+          command: poetry config virtualenvs.in-project true
+          name: Setup poetry
+      - restore_cache:
+          name: Restore poetry package cache
+          keys:
+            - python38-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+            - python38-packages-{{ checksum "poetry.lock" }}
+            - python38-packages
+      - run:
+          command: poetry install
+          name: Install python dependencies
+      - save_cache:
+          name: Save poetry package cache
+          key: python38-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+          paths:
+            - .venv/
+      - run:
+          command: poetry run pytest tests
+          name: Run tests
+      - run:
+          command: poetry build -f wheel
+          name: Build wheel
+      - store_artifacts:
+          path: dist/
+  test-win-python37:
+    # https://circleci.com/docs/configuration-reference#resourceclass
+    resource_class: "windows.medium"
+    machine:
+      image: "windows-server-2022-gui:current"
+      shell: bash.exe
+    steps:
+      - checkout
+      - run:
+          command: poetry config virtualenvs.in-project true
+          name: Setup poetry
+      - restore_cache:
+          name: Restore poetry package cache
+          keys:
+            - python37-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+            - python37-packages-{{ checksum "poetry.lock" }}
+            - python37-packages
+      - run:
+          command: poetry install
+          name: Install python dependencies
+      - save_cache:
+          name: Save poetry package cache
+          key: python37-packages-{{ checksum "poetry.lock" }}-{{ .Branch }}
+          paths:
+            - .venv/
+      - run:
+          command: poetry run pytest tests
+          name: Run tests
+      - run:
+          command: poetry build -f wheel
+          name: Build wheel
+      - store_artifacts:
+          path: dist/
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  main_workflow:
+    jobs:
+      - lint-win-python310:
+          pre-steps:
+            - run:
+                command: choco upgrade chocolatey -y
+                name: Upgrade  choco
+            - run:
+                command: choco install python --version=3.10.7 --allow-downgrade --force -y
+                name: Install python 3.10.7
+            - run:
+                command: python --version
+                name: Test python installed
+            - run:
+                command: curl -sSL https://install.python-poetry.org | python -
+                name: Install poetry
+            - run:
+                command: echo 'export PATH="${USERPROFILE}\AppData\Roaming\pypoetry\venv\Scripts\:${PATH}"' >> ${BASH_ENV}
+                name: Add poetry to $PATH
+            - run:
+                command: poetry -v
+                name: Test poetry installed
+          post-steps:
+            - run:
+                command: echo "Done"
+                name: Done
+      - test-win-python310:
+          pre-steps:
+            - run:
+                command: choco upgrade chocolatey -y
+                name: Upgrade  choco
+            - run:
+                command: choco install python --version=3.10.7 --allow-downgrade --force -y
+                name: Install python 3.10.7
+            - run:
+                command: python --version
+                name: Test python installed
+            - run:
+                command: curl -sSL https://install.python-poetry.org | python -
+                name: Install poetry
+            - run:
+                command: echo 'export PATH="${USERPROFILE}\AppData\Roaming\pypoetry\venv\Scripts\:${PATH}"' >> ${BASH_ENV}
+                name: Add poetry to $PATH
+            - run:
+                command: poetry -v
+                name: Test poetry installed
+          post-steps:
+            - run:
+                command: echo "Done"
+                name: Done
+      - test-win-python39:
+          pre-steps:
+            - run:
+                command: choco upgrade chocolatey -y
+                name: Upgrade  choco
+            - run:
+                command: choco install python --version=3.9.13 --allow-downgrade --force -y
+                name: Install python 3.9.13
+            - run:
+                command: python --version
+                name: Test python installed
+            - run:
+                command: curl -sSL https://install.python-poetry.org | python -
+                name: Install poetry
+            - run:
+                command: echo 'export PATH="${USERPROFILE}\AppData\Roaming\pypoetry\venv\Scripts\:${PATH}"' >> ${BASH_ENV}
+                name: Add poetry to $PATH
+            - run:
+                command: poetry -v
+                name: Test poetry installed
+          post-steps:
+            - run:
+                command: echo "Done"
+                name: Done
+      - test-win-python38:
+          pre-steps:
+            - run:
+                command: choco upgrade chocolatey -y
+                name: Upgrade  choco
+            - run:
+                command: choco install python --version=3.8.10 --allow-downgrade --force -y
+                name: Install python 3.8.10
+            - run:
+                command: python --version
+                name: Test python installed
+            - run:
+                command: curl -sSL https://install.python-poetry.org | python -
+                name: Install poetry
+            - run:
+                command: echo 'export PATH="${USERPROFILE}\AppData\Roaming\pypoetry\venv\Scripts\:${PATH}"' >> ${BASH_ENV}
+                name: Add poetry to $PATH
+            - run:
+                command: poetry -v
+                name: Test poetry installed
+          post-steps:
+            - run:
+                command: echo "Done"
+                name: Done
+      - test-win-python37:
+          pre-steps:
+            - run:
+                command: choco upgrade chocolatey -y
+                name: Upgrade  choco
+            - run:
+                command: choco install python --version=3.7.9 --allow-downgrade --force -y
+                name: Install python 3.7.9
+            - run:
+                command: python --version
+                name: Test python installed
+            - run:
+                command: curl -sSL https://install.python-poetry.org | python -
+                name: Install poetry
+            - run:
+                command: echo 'export PATH="${USERPROFILE}\AppData\Roaming\pypoetry\venv\Scripts\:${PATH}"' >> ${BASH_ENV}
+                name: Add poetry to $PATH
+            - run:
+                command: poetry -v
+                name: Test poetry installed
+          post-steps:
+            - run:
+                command: echo "Done"
+                name: Done
