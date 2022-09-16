@@ -5,7 +5,7 @@ tests_tox:
 	poetry run tox
 
 tests:
-	pytest tests
+	poetry run pytest tests/
 
 lint:
 	poetry run black . --check
@@ -13,6 +13,7 @@ lint:
 	mypy bas_remote/
 
 lint_fix:
+	isort bas_client/ tests/
 	poetry run black .
 
 clean:

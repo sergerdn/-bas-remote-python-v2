@@ -3,8 +3,7 @@ import os.path
 import unittest
 
 from bas_remote import BasRemoteClient, Options
-from tests import ABS_PATH, test_remote_script_password
-from tests import test_remote_script_name, test_remote_script_user
+from tests import ABS_PATH, test_remote_script_name, test_remote_script_password, test_remote_script_user
 
 
 class BaseTest(unittest.TestCase):

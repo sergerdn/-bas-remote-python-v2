@@ -3,7 +3,7 @@ import unittest
 from bas_remote.errors import FunctionError
 from tests import windows_test
 from tests.integration.base import BaseTest
-from tests.integration.helpers import generate_pairs, generate_one_pair
+from tests.integration.helpers import generate_one_pair, generate_pairs
 
 
 @windows_test

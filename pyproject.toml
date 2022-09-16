@@ -72,6 +72,7 @@ tox = "^3.25.1"
 tox-poetry = "^0.4.1"
 flake8-tidy-imports = "^4.8.0"
 flake8 = "^5.0.4"
+isort = "^5.10.1"
 mypy = "^0.971"
 black = { git = "https://github.com/psf/black" }
 

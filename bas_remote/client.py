@@ -1,6 +1,8 @@
 import asyncio
 import json
+import socket
 from asyncio import Future
+from contextlib import closing
 from random import randint
 from typing import Callable, Optional, Dict, Any
 
@@ -55,8 +57,15 @@ class BasRemoteClient(AsyncIOEventEmitter):
     async def start(self) -> None:
         """Start the client and wait for it initialize."""
         await self._engine.initialize()
-        port = randint(10000, 20000)
 
+        def find_free_port():
+            with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+                s.bind(("", 0))
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                return s.getsockname()[1]
+
+        # port = randint(10000, 20000)
+        port = find_free_port()
         await self._engine.start(port)
         await self._socket.start(port)
         await asyncio.wait_for(fut=self._future, timeout=60)
