@@ -61,7 +61,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         if logger is not None:
             self.logger = logger
         else:
-            self.logger = logging.getLogger("[bas-remote]")
+            self.logger = logging.getLogger("[bas-remote:client]")
 
     @property
     def is_started(self):
