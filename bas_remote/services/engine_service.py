@@ -61,7 +61,7 @@ class EngineService:
 
         zip_path = path.join(self._zip_dir, f"{zip_name}.zip")
 
-        self.logger.debug(f"start at port:{port}, arch:{arch}, zip_name:{zip_name}, url_name:{url_name}")
+        self.logger.debug(f"start at port :{port}, arch:{arch}, zip_name:{zip_name}, url_name:{url_name}")
 
         if not path.exists(self._zip_dir):
             makedirs(self._zip_dir)
@@ -123,6 +123,7 @@ class EngineService:
 
         lock = self._get_lock_path()
         self._lock = FileLock(lock)
+        self.logger.debug(f"lock: {self._lock.lock_file}")
         self._lock.acquire()
 
     def _clear_run_directory(self) -> None:
