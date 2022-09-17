@@ -75,6 +75,7 @@ flake8-tidy-imports = "^4.8.0"
 flake8 = "^5.0.4"
 isort = "^5.10.1"
 mypy = "^0.971"
+PyYAML = "^6.0"
 black = { git = "https://github.com/psf/black" }
 
 [tool.black]
