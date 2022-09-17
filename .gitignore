@@ -113,3 +113,5 @@ static_collected
 data/
 /.pytest_cache/
 /.bas-remote-app-*/
+*.pytest_cache/
+
