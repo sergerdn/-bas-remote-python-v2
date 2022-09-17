@@ -16,7 +16,6 @@ class TestFuncMultiple:
         result = await client_thread.run_function("CheckIpJson")
         print(result)
 
-    # @pytest.mark.skip(reason="no way to fix it at the moment")
     @pytest.mark.timeout(60)
     async def test_function_return_big_data(self, client_thread: BasThread):
         data = await client_thread.run_function("TestReturnBigData")
