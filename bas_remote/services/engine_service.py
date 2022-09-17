@@ -117,6 +117,7 @@ class EngineService:
     def _start_engine_process(self, port: int) -> None:
         cmd = [path.join(self._exe_dir, "FastExecuteScript.exe"), f"--remote-control-port={port}", "--remote-control"]
         cwd = self._exe_dir
+
         self.logger.debug(f"start engine process: {cmd}, {cwd}")
 
         self._process = subprocess.Popen(cmd, cwd=cwd)
@@ -138,6 +139,7 @@ class EngineService:
 
     async def close(self) -> None:
         """Close the engine service."""
+        self.logger.debug("closing...")
         self._process.kill()
         self._lock.release()
 
