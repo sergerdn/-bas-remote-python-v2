@@ -19,7 +19,7 @@ class BasFunction(BasRunner):
         self._run(name, params)
 
     async def _run_function(self, name: str, params: Optional[Dict] = None) -> None:
-        self._id = randint(1, 1000000)
+        self._id = randint(1000000, 9999999)
         await self._client.start_thread(self.id)
         await self._run_task(name, params)
         await self.stop()
