@@ -1,7 +1,10 @@
 import asyncio
+import logging
 
 from bas_remote import BasRemoteClient
 from bas_remote import Options
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 async def main():

@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import socket
 from asyncio import Future
 from contextlib import closing
@@ -7,6 +8,7 @@ from random import randint
 from typing import Callable, Optional, Dict, Any
 
 from pyee.asyncio import AsyncIOEventEmitter
+from websockets.typing import LoggerLike
 
 from bas_remote.errors import AuthenticationError, ClientNotStartedError
 from bas_remote.options import Options
@@ -31,7 +33,15 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
     _future: Future = None
 
-    def __init__(self, options: Options, loop: Optional[asyncio.AbstractEventLoop] = None):
+    logger: LoggerLike
+    port: int
+
+    def __init__(
+        self,
+        options: Options,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+        logger: Optional[LoggerLike] = None,
+    ):
         """Create an instance of BasRemoteClient class.
 
         Args:
@@ -48,6 +58,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
         self.on("message_received", self._on_message_received)
         self.on("socket_open", self._on_socket_open)
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger("[bas-remote]")
 
     @property
     def is_started(self):
@@ -65,12 +79,15 @@ class BasRemoteClient(AsyncIOEventEmitter):
                 return s.getsockname()[1]
 
         # port = randint(10000, 20000)
-        port = find_free_port()
-        await self._engine.start(port)
-        await self._socket.start(port)
+        self.port = find_free_port()
+        self.logger.info("running at port: %s" % self.port)
+        await self._engine.start(self.port)
+        await self._socket.start(self.port)
         await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_message_received(self, message: Message) -> None:
+        self.logger.debug("message received: %s" % message)
+
         if message.type_ == "initialize":
             await self._send("accept_resources", {"-bas-empty-script-": True})
         elif message.type_ == "thread_start" and not self._future.done():
@@ -134,14 +151,14 @@ class BasRemoteClient(AsyncIOEventEmitter):
         return await self._send_async(type_, data)
 
     async def _send(self, type_: str, data: Optional[Dict] = None, async_=False) -> int:
-        return await self._socket.send(
-            message=Message(
-                data={} if not data else data,
-                id_=randint(100000, 999999),
-                async_=async_,
-                type_=type_,
-            )
+        message = Message(
+            data={} if not data else data,
+            id_=randint(100000, 999999),
+            async_=async_,
+            type_=type_,
         )
+        self.logger.debug("message send: %s" % message)
+        return await self._socket.send(message=message)
 
     async def _send_async(self, type_: str, data: Optional[Dict] = None) -> Any:
         future = self.loop.create_future()

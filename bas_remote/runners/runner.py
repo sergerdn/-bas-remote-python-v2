@@ -1,4 +1,5 @@
 import json
+from abc import ABC, abstractmethod
 from asyncio import Future, AbstractEventLoop
 from typing import Optional, Dict
 
@@ -6,7 +7,7 @@ from bas_remote.errors import FunctionError
 from bas_remote.types import Response
 
 
-class BasRunner:
+class BasRunner(ABC):
     _loop: AbstractEventLoop = None
 
     _future: Future = None
@@ -30,6 +31,7 @@ class BasRunner:
         task = self._run_function(name, params)
         self._loop.create_task(task)
 
+    @abstractmethod
     async def _run_function(self, name: str, params: Optional[Dict] = None):
         """Run the BAS function asynchronously.
 
