@@ -1,8 +1,11 @@
 import asyncio
+import logging
+from typing import Optional
 
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 from websockets.legacy.client import WebSocketClientProtocol
 from websockets.legacy.client import connect
+from websockets.typing import LoggerLike
 
 from bas_remote.errors import SocketNotConnectedError
 from bas_remote.types import Message
@@ -16,11 +19,16 @@ class SocketService:
     _socket: WebSocketClientProtocol = None
 
     _buffer: str = ""
+    logger: LoggerLike
 
-    def __init__(self, client):
+    def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of SocketService class."""
         self._emit = client.emit
         self._loop = client.loop
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger("[bas-remote:socket]")
 
     async def start(self, port: int) -> None:
         """Asynchronously start the socket service with the specified port.
@@ -28,8 +36,10 @@ class SocketService:
         Arguments:
             port (int): Selected port number.
         """
+
         attempt = 1
         while not self.is_connected:
+            self.logger.debug(f"starting at port: {port}, attempt: {attempt} ...")
             try:
                 # TODO: should be configurable
                 self._socket = await connect(f"ws://127.0.0.1:{port}", open_timeout=None, max_size=None)

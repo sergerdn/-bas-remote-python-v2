@@ -1,13 +1,16 @@
 import asyncio
+import logging
 import subprocess
 from os import listdir, makedirs, path
 from platform import machine
 from shutil import rmtree
+from typing import Optional
 from zipfile import ZipFile
 
 from aiofiles import open
 from aiohttp import ClientSession
 from filelock import FileLock, Timeout
+from websockets.typing import LoggerLike
 
 from bas_remote.errors import ScriptNotExistError, ScriptNotSupportedError
 from bas_remote.types import Script
@@ -24,7 +27,9 @@ class EngineService:
     _zip_dir: str = None
     """The path to the directory in which the archive file of the engine is located."""
 
-    def __init__(self, client):
+    logger: LoggerLike
+
+    def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of EngineService class."""
         script_name = client.options.script_name
         working_dir = client.options.working_dir
@@ -37,6 +42,11 @@ class EngineService:
         self._process = None
         self._lock = None
 
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger("[bas-remote:engine]")
+
     async def start(self, port: int) -> None:
         """Asynchronously start the engine service with the specified port.
 
@@ -44,11 +54,14 @@ class EngineService:
             port (int):
                 Selected port number.
         """
+
         arch = 64 if machine().endswith("64") else 32
         zip_name = f"FastExecuteScriptProtected.x{arch}"
         url_name = f"FastExecuteScriptProtected{arch}"
 
         zip_path = path.join(self._zip_dir, f"{zip_name}.zip")
+
+        self.logger.debug(f"start at port :{port}, arch:{arch}, zip_name:{zip_name}, url_name:{url_name}")
 
         if not path.exists(self._zip_dir):
             makedirs(self._zip_dir)
@@ -79,6 +92,7 @@ class EngineService:
 
     async def _download_executable(self, zip_path: str, zip_name: str, url_name: str) -> None:
         url = f"{END_POINT}/distr/{url_name}/{path.basename(self._zip_dir)}/{zip_name}.zip"
+        self.logger.debug(f"download executable: {url}")
 
         async with ClientSession(loop=self._loop) as session:
             async with session.get(url) as response:
@@ -91,6 +105,8 @@ class EngineService:
                     return await response.release()
 
     async def _extract_executable(self, zip_path: str) -> None:
+        self.logger.debug(f"extract executable: {zip_path}")
+
         with ZipFile(zip_path, "r") as file:
 
             async def task(name, zip_file: ZipFile):
@@ -99,13 +115,16 @@ class EngineService:
             await asyncio.wait([task(name, file) for name in file.namelist()])
 
     def _start_engine_process(self, port: int) -> None:
-        self._process = subprocess.Popen(
-            [path.join(self._exe_dir, "FastExecuteScript.exe"), f"--remote-control-port={port}", "--remote-control"],
-            cwd=self._exe_dir,
-        )
+        cmd = [path.join(self._exe_dir, "FastExecuteScript.exe"), f"--remote-control-port={port}", "--remote-control"]
+        cwd = self._exe_dir
+
+        self.logger.debug(f"start engine process: {cmd}, {cwd}")
+
+        self._process = subprocess.Popen(cmd, cwd=cwd)
 
         lock = self._get_lock_path()
         self._lock = FileLock(lock)
+        self.logger.debug(f"lock: {self._lock.lock_file}")
         self._lock.acquire()
 
     def _clear_run_directory(self) -> None:
@@ -120,6 +139,7 @@ class EngineService:
 
     async def close(self) -> None:
         """Close the engine service."""
+        self.logger.debug("closing...")
         self._process.kill()
         self._lock.release()
 
