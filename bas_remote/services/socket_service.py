@@ -1,8 +1,8 @@
 import asyncio
 
-from websockets.legacy.client import connect
-from websockets.legacy.client import WebSocketClientProtocol
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
+from websockets.legacy.client import WebSocketClientProtocol
+from websockets.legacy.client import connect
 
 from bas_remote.errors import SocketNotConnectedError
 from bas_remote.types import Message
@@ -31,7 +31,8 @@ class SocketService:
         attempt = 1
         while not self.is_connected:
             try:
-                self._socket = await connect(f"ws://127.0.0.1:{port}", open_timeout=None)
+                # TODO: should be configurable
+                self._socket = await connect(f"ws://127.0.0.1:{port}", open_timeout=None, max_size=None)
             except ConnectionRefusedError:
                 if attempt == 60:
                     raise SocketNotConnectedError()
