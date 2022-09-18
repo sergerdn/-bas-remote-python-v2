@@ -41,6 +41,7 @@ class TestFuncMultiple:
                 ]
             ) == sorted(one.keys())
 
+    @pytest.mark.timeout(60 * 3)
     async def test_function_task_canceled_error(
             self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
