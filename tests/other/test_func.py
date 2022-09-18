@@ -89,13 +89,14 @@ class TestFuncMultiple:
         proc_found = False
         for proc in psutil.process_iter():
             if proc.name() == "FastExecuteScript.exe":
-                if client.options.working_dir in proc.cmdline():
+                if client.options.working_dir in proc.cmdline()[0]:
                     proc_found = True
                     proc.terminate()
                     with pytest.raises(psutil.NoSuchProcess):
                         while 1:
                             time.sleep(1)
                             psutil.Process(pid=proc.pid)
+            if proc_found:
                 break
         assert proc_found is True
 
