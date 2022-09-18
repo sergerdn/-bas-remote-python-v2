@@ -66,7 +66,7 @@ class TestFuncMultiple:
         await client.start()
         thread = client.create_thread()
 
-        """because closed connection"""
+        """because connection closed"""
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("TestReturnBigData")
 
@@ -94,6 +94,6 @@ class TestFuncMultiple:
             while 1:
                 psutil.Process(pid=proc.pid)
 
-        """because process killed and closed connection"""
+        """because process killed and connection closed"""
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("CheckIpJson")
