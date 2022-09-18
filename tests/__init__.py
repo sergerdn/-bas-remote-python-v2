@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 logging.basicConfig(level=logging.DEBUG)
 
 ABS_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))  # root project directory
-dotenv_path = os.path.join(ABS_PATH, "tests", ".env")
+dotenv_path = os.path.join(ABS_PATH, ".env")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path=dotenv_path)
 

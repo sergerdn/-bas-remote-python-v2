@@ -10,8 +10,7 @@ from tests import test_app_working_dir
 
 @pytest.fixture(scope="module")
 def remote_script_name(request):
-    remote_script_name = os.environ.get("TEST_REMOTE_SCRIPT_NAME", "TestRemoteControlV2")
-    return remote_script_name
+    return os.environ.get("TEST_REMOTE_SCRIPT_NAME", "TestRemoteControlV2")
 
 
 @pytest.fixture(scope="module")
@@ -38,20 +37,28 @@ def event_loop() -> asyncio.AbstractEventLoop:
 
 
 @pytest.fixture(scope="function")
-def client_thread(
+def client_options(
     event_loop: asyncio.AbstractEventLoop,
     working_dir,
     remote_script_name,
     remote_script_user,
     remote_script_password,
+) -> Options:
+    yield Options(
+        script_name=remote_script_name,
+        login=remote_script_user,
+        password=remote_script_password,
+        working_dir=working_dir,
+    )
+
+
+@pytest.fixture(scope="function")
+def client_thread(
+    event_loop: asyncio.AbstractEventLoop,
+    client_options,
 ) -> BasThread:
     client = BasRemoteClient(
-        options=Options(
-            script_name=remote_script_name,
-            login=remote_script_user,
-            password=remote_script_password,
-            working_dir=working_dir,
-        ),
+        options=client_options,
         loop=event_loop,
     )
 

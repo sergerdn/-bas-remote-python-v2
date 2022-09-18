@@ -49,6 +49,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
             loop (AbstractEventLoop, optional): AsyncIO event loop object. Defaults to None.
         """
         self.loop = loop or asyncio.get_event_loop()
+        self.loop.set_exception_handler(handler=self._exception_handler)
         super().__init__(self.loop)
         self.options = options
 
@@ -58,6 +59,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
         self.on("message_received", self._on_message_received)
         self.on("socket_open", self._on_socket_open)
+        self.on("socket_close", self._on_socket_close)
         if logger is not None:
             self.logger = logger
         else:
@@ -67,6 +69,11 @@ class BasRemoteClient(AsyncIOEventEmitter):
     def is_started(self):
         """Gets a value that indicates whether the current client is already running."""
         return self._is_started
+
+    def _exception_handler(self, loop, context, *args, **kwargs):
+        self.logger.error(context)
+        for task in asyncio.all_tasks(loop=self.loop):
+            task.cancel()
 
     async def start(self) -> None:
         """Start the client and wait for it initialize."""
@@ -112,6 +119,9 @@ class BasRemoteClient(AsyncIOEventEmitter):
                 "login": self.options.login,
             },
         )
+
+    async def _on_socket_close(self, *args, **kwargs) -> None:
+        pass
 
     def run_function(self, function_name: str, function_params: Optional[Dict] = None) -> BasFunction:
         """Call the BAS function asynchronously.
@@ -164,6 +174,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         future = self.loop.create_future()
         id_ = await self.send(type_, data, True)
         self._requests[id_] = lambda result: future.set_result(result)
+
         return await future
 
     async def start_thread(self, thread_id: int) -> None:
@@ -193,7 +204,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
     async def close(self) -> None:
         """Close the client."""
         await self._engine.close()
-        await self._socket.close()
+        await self._socket.close(silence=True)
         self._is_started = False
 
 
