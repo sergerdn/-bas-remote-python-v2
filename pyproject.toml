@@ -87,7 +87,7 @@ include = '\.pyi?$'
 
 [pytest]
 timeout_func_only = true
-timeout = 300 # global settings
+timeout = 600 # global settings
 
 [tool.poetry.build]
 #script = "build.py"
