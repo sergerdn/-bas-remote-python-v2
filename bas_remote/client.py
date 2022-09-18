@@ -71,6 +71,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         return self._is_started
 
     def _exception_handler(self, loop, context, *args, **kwargs):
+        """should not be reached here in normal situation"""
         self.logger.error(context)
         for task in asyncio.all_tasks(loop=self.loop):
             task.cancel()
