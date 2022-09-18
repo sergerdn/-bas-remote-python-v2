@@ -40,8 +40,8 @@ class TestFuncMultiple:
                 ]
             ) == sorted(one.keys())
 
-    async def test_function_return_big_data_exc(
-        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+    async def test_function_task_canceled_error(
+            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
