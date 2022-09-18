@@ -104,4 +104,3 @@ class TestFuncMultiple:
         """because process killed and connection closed"""
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("CheckIpJson")
-            pass
