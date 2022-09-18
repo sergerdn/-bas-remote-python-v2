@@ -2,6 +2,7 @@ import asyncio
 import logging
 from typing import Optional
 
+import websockets.legacy.client
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 from websockets.legacy.client import WebSocketClientProtocol
 from websockets.legacy.client import connect
@@ -11,6 +12,18 @@ from bas_remote.errors import SocketNotConnectedError
 from bas_remote.types import Message
 
 SEPARATOR = "---Message--End---"
+
+
+class SocketClosedException(Exception):
+    pass
+
+
+def _connect_websocket(port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
+    return connect(
+        f"ws://127.0.0.1:{port}",
+        open_timeout=None,
+        max_size=None,
+    )
 
 
 class SocketService:
@@ -42,7 +55,7 @@ class SocketService:
             self.logger.debug(f"starting at port: {port}, attempt: {attempt} ...")
             try:
                 # TODO: should be configurable
-                self._socket = await connect(f"ws://127.0.0.1:{port}", open_timeout=None, max_size=None)
+                self._socket = await _connect_websocket(port=port)
             except ConnectionRefusedError:
                 if attempt == 60:
                     raise SocketNotConnectedError()
@@ -80,6 +93,7 @@ class SocketService:
                 break
             except ConnectionClosedOK:
                 break
+        self.logger.info("connection closed")
         self._closed()
 
     async def send(self, message: Message) -> int:
@@ -88,11 +102,24 @@ class SocketService:
         self._emit("message_sent", message)
         return message.id_
 
-    async def close(self) -> None:
+    async def close(self, silence=False) -> None:
         """Close the socket service."""
+        exc = SocketClosedException("connections accidentally closed: %s", self._socket.close_sent)
+
         if not self.is_connected:
+            if not silence:
+                raise exc
             return
+
+        if self._socket.closed:
+            self.logger.info("connections closed: %s", self._socket.close_sent)
+            if not silence:
+                raise exc
+            return
+
         await self._socket.close()
+        if not silence:
+            raise exc
 
 
 __all__ = ["SocketService"]

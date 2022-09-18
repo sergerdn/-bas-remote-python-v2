@@ -10,8 +10,7 @@ from tests import test_app_working_dir
 
 @pytest.fixture(scope="module")
 def remote_script_name(request):
-    remote_script_name = os.environ.get("TEST_REMOTE_SCRIPT_NAME", "TestRemoteControlV2")
-    return remote_script_name
+    return os.environ.get("TEST_REMOTE_SCRIPT_NAME", "TestRemoteControlV2")
 
 
 @pytest.fixture(scope="module")

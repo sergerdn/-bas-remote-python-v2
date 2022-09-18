@@ -1,5 +1,7 @@
 import asyncio
 
+import yaml
+
 from bas_remote import BasRemoteClient, Options
 from examples.settings import remote_script_name, remote_script_password, remote_script_user, working_dir
 
@@ -15,12 +17,13 @@ async def main():
     )
 
     await client.start()
+    client_thread = client.create_thread()
 
-    result = await client.run_function("GoogleSearch", {"Query": "cats"})
+    data = await client_thread.run_function("TestReturnBigData")
+    data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
+    print(data_obj[0])
 
-    for link in result:
-        print(link)
-
+    await client_thread.stop()
     await client.close()
 
 

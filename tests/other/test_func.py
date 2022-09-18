@@ -1,22 +1,22 @@
 import pytest
+import websockets
 import yaml
+from websockets.legacy.client import connect
 
+import bas_remote.services
 from bas_remote.runners import BasThread
 
 
 @pytest.mark.asyncio
 class TestFuncMultiple:
-    @pytest.mark.timeout(60)
     async def test_function_check_ip(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIp")
         print(result)
 
-    @pytest.mark.timeout(60)
     async def test_function_check_ip_json(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIpJson")
         print(result)
 
-    @pytest.mark.timeout(60)
     async def test_function_return_big_data(self, client_thread: BasThread):
         data = await client_thread.run_function("TestReturnBigData")
         data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
@@ -35,3 +35,14 @@ class TestFuncMultiple:
                     "url",
                 ]
             ) == sorted(one.keys())
+
+    async def test_function_return_big_data_exc(self, client_thread: BasThread):
+        def _connect_websocket(port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
+            return connect(
+                f"ws://127.0.0.1:{port}",
+                open_timeout=None,
+            )
+
+        bas_remote.services.SocketService._connect_websocket = _connect_websocket
+        data = await client_thread.run_function("TestReturnBigData")
+        pass
