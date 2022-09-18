@@ -33,6 +33,8 @@ def event_loop() -> asyncio.AbstractEventLoop:
     """Create an instance of the default event loop for each test case."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
+    if loop.is_closed():
+        return
     loop.close()
 
 

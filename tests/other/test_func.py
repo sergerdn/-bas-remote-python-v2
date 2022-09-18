@@ -43,8 +43,8 @@ class TestFuncMultiple:
             ) == sorted(one.keys())
 
     @pytest.mark.timeout(timeout=60 * 3)
-    async def test_task_canceled_error(
-            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+    async def test_task_canceled(
+        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
@@ -74,7 +74,7 @@ class TestFuncMultiple:
 
     @pytest.mark.timeout(timeout=60 * 3)
     async def test_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
-        # pytest tests/other/ -k "test_process_killed"
+        # poetry run pytest tests/other/ -k "test_process_killed"
         client = BasRemoteClient(
             options=client_options,
             loop=event_loop,
