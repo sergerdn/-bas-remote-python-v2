@@ -65,5 +65,6 @@ class TestFuncMultiple:
         await client.start()
         thread = client.create_thread()
 
+        """because closed connection"""
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("TestReturnBigData")
