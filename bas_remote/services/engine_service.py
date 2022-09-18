@@ -28,7 +28,7 @@ class EngineService:
     """The path to the directory in which the archive file of the engine is located."""
 
     logger: LoggerLike
-    _lock: BaseFileLock
+    _lock: Optional[BaseFileLock] = None
 
     def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of EngineService class."""
@@ -108,7 +108,6 @@ class EngineService:
         self.logger.debug(f"extract executable: {zip_path}")
 
         with ZipFile(zip_path, "r") as file:
-
             async def task(name, zip_file: ZipFile):
                 zip_file.extract(name, self._exe_dir, None)
 
