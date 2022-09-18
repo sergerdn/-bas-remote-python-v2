@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 ABS_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))  # root  directory
 
-dotenv_path = os.path.join(ABS_PATH, "examples", ".env")
+dotenv_path = os.path.join(ABS_PATH, ".env")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path=dotenv_path)
 
