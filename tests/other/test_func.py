@@ -48,7 +48,7 @@ class TestFuncMultiple:
     @pytest.mark.skip("skipped")
     @pytest.mark.timeout(timeout=60 * 3)
     async def test_function_task_canceled_error(
-        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
@@ -86,13 +86,18 @@ class TestFuncMultiple:
         await client.start()
         thread = client.create_thread()
 
+        proc_found = False
         for proc in psutil.process_iter():
             if proc.name() == "FastExecuteScript.exe":
-                proc.terminate()
-                with pytest.raises(psutil.NoSuchProcess):
-                    while 1:
-                        time.sleep(1)
-                        psutil.Process(pid=proc.pid)
+                if client.options.working_dir in proc.cmdline():
+                    proc_found = True
+                    proc.terminate()
+                    with pytest.raises(psutil.NoSuchProcess):
+                        while 1:
+                            time.sleep(1)
+                            psutil.Process(pid=proc.pid)
+                break
+        assert proc_found is True
 
         """because process killed and connection closed"""
         with pytest.raises(asyncio.exceptions.CancelledError):
