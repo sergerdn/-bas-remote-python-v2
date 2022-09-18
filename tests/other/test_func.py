@@ -1,5 +1,6 @@
 import asyncio
 
+import psutil
 import pytest
 import websockets
 import yaml
@@ -41,7 +42,7 @@ class TestFuncMultiple:
             ) == sorted(one.keys())
 
     async def test_function_task_canceled_error(
-        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
@@ -68,3 +69,31 @@ class TestFuncMultiple:
         """because closed connection"""
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("TestReturnBigData")
+
+    async def test_function_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
+        client = BasRemoteClient(
+            options=client_options,
+            loop=event_loop,
+        )
+
+        await client.start()
+        thread = client.create_thread()
+
+        proc = None
+        for proc in psutil.process_iter():
+            if proc.name() == "FastExecuteScript.exe":
+                break
+
+        assert proc is not None
+
+        proc.terminate()
+        with pytest.raises(asyncio.exceptions.CancelledError):
+            await asyncio.sleep(5)
+
+        with pytest.raises(psutil.NoSuchProcess):
+            while 1:
+                psutil.Process(pid=proc.pid)
+
+        """because process killed and closed connection"""
+        with pytest.raises(asyncio.exceptions.CancelledError):
+            await thread.run_function("CheckIpJson")
