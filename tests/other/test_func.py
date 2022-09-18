@@ -15,15 +15,15 @@ from bas_remote.runners import BasThread
 
 @pytest.mark.asyncio
 class TestFuncMultiple:
-    async def test_function_check_ip(self, client_thread: BasThread):
+    async def test_check_ip(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIp")
         print(result)
 
-    async def test_function_check_ip_json(self, client_thread: BasThread):
+    async def test_check_ip_json(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIpJson")
         print(result)
 
-    async def test_function_return_big_data(self, client_thread: BasThread):
+    async def test_return_big_data(self, client_thread: BasThread):
         data = await client_thread.run_function("TestReturnBigData")
         data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
         assert len(data_obj) > 1
@@ -43,7 +43,7 @@ class TestFuncMultiple:
             ) == sorted(one.keys())
 
     @pytest.mark.timeout(timeout=60 * 3)
-    async def test_function_task_canceled_error(
+    async def test_task_canceled_error(
         self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
@@ -73,7 +73,7 @@ class TestFuncMultiple:
             await thread.run_function("TestReturnBigData")
 
     @pytest.mark.timeout(timeout=60 * 3)
-    async def test_function_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
+    async def test_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
         client = BasRemoteClient(
             options=client_options,
             loop=event_loop,
