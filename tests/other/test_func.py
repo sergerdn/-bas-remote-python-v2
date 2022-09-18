@@ -84,15 +84,12 @@ class TestFuncMultiple:
         await client.start()
         thread = client.create_thread()
 
-        proc = None
         for proc in psutil.process_iter():
             if proc.name() == "FastExecuteScript.exe":
                 proc.terminate()
-
-        assert proc is not None
-
-        with pytest.raises(psutil.NoSuchProcess):
-            psutil.Process(pid=proc.pid)
+                with pytest.raises(psutil.NoSuchProcess):
+                    while 1:
+                        psutil.Process(pid=proc.pid)
 
         """because process killed and connection closed"""
         with pytest.raises(asyncio.exceptions.CancelledError):
