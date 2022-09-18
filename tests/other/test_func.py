@@ -91,8 +91,9 @@ class TestFuncMultiple:
             await asyncio.sleep(5)
 
         with pytest.raises(psutil.NoSuchProcess):
-            while 1:
+            for _ in range(0, 60):
                 psutil.Process(pid=proc.pid)
+                await asyncio.sleep(1)
 
         """because process killed and connection closed"""
         with pytest.raises(asyncio.exceptions.CancelledError):
