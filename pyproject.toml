@@ -14,7 +14,7 @@ packages = [
 ]
 
 include = [
-    {path = "docs/*.png" }
+    { path = "docs/*.png" }
 ]
 
 keywords = [
@@ -84,6 +84,10 @@ psutil = "^5.9.2"
 line-length = 120
 target-version = ['py37']
 include = '\.pyi?$'
+
+[pytest]
+timeout_func_only = true
+timeout = 300 # global settings
 
 [tool.poetry.build]
 #script = "build.py"
