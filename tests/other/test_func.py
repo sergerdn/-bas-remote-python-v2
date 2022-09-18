@@ -42,7 +42,7 @@ class TestFuncMultiple:
             ) == sorted(one.keys())
 
     async def test_function_task_canceled_error(
-        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
@@ -70,7 +70,7 @@ class TestFuncMultiple:
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("TestReturnBigData")
 
-    @pytest.mark.timeout(60)
+    @pytest.mark.timeout(60 * 3)
     async def test_function_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
         client = BasRemoteClient(
             options=client_options,
