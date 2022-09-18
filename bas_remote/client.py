@@ -71,9 +71,12 @@ class BasRemoteClient(AsyncIOEventEmitter):
         return self._is_started
 
     def _exception_handler(self, loop, context, *args, **kwargs):
+        """should not be reached here in normal situation"""
         self.logger.error(context)
         for task in asyncio.all_tasks(loop=self.loop):
             task.cancel()
+
+        self._engine.lock_release()
 
     async def start(self) -> None:
         """Start the client and wait for it initialize."""
@@ -88,8 +91,8 @@ class BasRemoteClient(AsyncIOEventEmitter):
         # port = randint(10000, 20000)
         self.port = find_free_port()
         self.logger.info("running at port: %s" % self.port)
-        await self._engine.start(self.port)
-        await self._socket.start(self.port)
+        await asyncio.wait_for(fut=self._engine.start(self.port), timeout=60)
+        await asyncio.wait_for(fut=self._socket.start(self.port), timeout=60)
         await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_message_received(self, message: Message) -> None:

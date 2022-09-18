@@ -14,7 +14,7 @@ packages = [
 ]
 
 include = [
-    {path = "docs/*.png" }
+    { path = "docs/*.png" }
 ]
 
 keywords = [
@@ -78,11 +78,16 @@ isort = "^5.10.1"
 mypy = "^0.971"
 PyYAML = "^6.0"
 black = { git = "https://github.com/psf/black" }
+psutil = "^5.9.2"
 
 [tool.black]
 line-length = 120
 target-version = ['py37']
 include = '\.pyi?$'
+
+[pytest]
+timeout_func_only = true
+timeout = 600 # global settings
 
 [tool.poetry.build]
 #script = "build.py"

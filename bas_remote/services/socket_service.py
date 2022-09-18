@@ -38,7 +38,7 @@ class SocketService:
     def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
         return connect(
             f"ws://127.0.0.1:{port}",
-            open_timeout=None,
+            open_timeout=10,
             max_size=None,
         )
 

@@ -1,5 +1,7 @@
 import asyncio
+import time
 
+import psutil
 import pytest
 import websockets
 import yaml
@@ -13,15 +15,15 @@ from bas_remote.runners import BasThread
 
 @pytest.mark.asyncio
 class TestFuncMultiple:
-    async def test_function_check_ip(self, client_thread: BasThread):
+    async def test_check_ip(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIp")
         print(result)
 
-    async def test_function_check_ip_json(self, client_thread: BasThread):
+    async def test_check_ip_json(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIpJson")
         print(result)
 
-    async def test_function_return_big_data(self, client_thread: BasThread):
+    async def test_return_big_data(self, client_thread: BasThread):
         data = await client_thread.run_function("TestReturnBigData")
         data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
         assert len(data_obj) > 1
@@ -40,7 +42,8 @@ class TestFuncMultiple:
                 ]
             ) == sorted(one.keys())
 
-    async def test_function_task_canceled_error(
+    @pytest.mark.timeout(timeout=60 * 3)
+    async def test_task_canceled(
         self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
@@ -65,6 +68,35 @@ class TestFuncMultiple:
         await client.start()
         thread = client.create_thread()
 
-        """because closed connection"""
+        """because connection closed"""
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("TestReturnBigData")
+
+    @pytest.mark.timeout(timeout=60 * 3)
+    async def test_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
+        # poetry run pytest tests/other/ -k "test_process_killed"
+        client = BasRemoteClient(
+            options=client_options,
+            loop=event_loop,
+        )
+
+        await client.start()
+        thread = client.create_thread()
+
+        proc_found = False
+        for proc in psutil.process_iter():
+            if proc.name() == "FastExecuteScript.exe":
+                if client.options.working_dir in proc.cmdline()[0]:
+                    proc_found = True
+                    proc.terminate()
+                    with pytest.raises(psutil.NoSuchProcess):
+                        for _ in range(0, 60):
+                            time.sleep(1)
+                            psutil.Process(pid=proc.pid)
+            if proc_found:
+                break
+        assert proc_found is True
+
+        """because process killed and connection closed"""
+        with pytest.raises(asyncio.exceptions.CancelledError):
+            await thread.run_function("CheckIpJson")
