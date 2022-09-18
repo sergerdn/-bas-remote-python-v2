@@ -18,14 +18,6 @@ class SocketClosedException(Exception):
     pass
 
 
-def _connect_websocket(port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
-    return connect(
-        f"ws://127.0.0.1:{port}",
-        open_timeout=None,
-        max_size=None,
-    )
-
-
 class SocketService:
     """Service that provides methods for interacting with BAS socket."""
 
@@ -43,6 +35,13 @@ class SocketService:
         else:
             self.logger = logging.getLogger("[bas-remote:socket]")
 
+    def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
+        return connect(
+            f"ws://127.0.0.1:{port}",
+            open_timeout=None,
+            max_size=None,
+        )
+
     async def start(self, port: int) -> None:
         """Asynchronously start the socket service with the specified port.
 
@@ -55,7 +54,7 @@ class SocketService:
             self.logger.debug(f"starting at port: {port}, attempt: {attempt} ...")
             try:
                 # TODO: should be configurable
-                self._socket = await _connect_websocket(port=port)
+                self._socket = await self._connect_websocket(port=port)
             except ConnectionRefusedError:
                 if attempt == 60:
                     raise SocketNotConnectedError()

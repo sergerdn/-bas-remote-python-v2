@@ -1,9 +1,13 @@
+import asyncio
+
 import pytest
 import websockets
 import yaml
+from pytest_mock import MockerFixture
 from websockets.legacy.client import connect
 
-import bas_remote.services
+import bas_remote
+from bas_remote import BasRemoteClient, Options
 from bas_remote.runners import BasThread
 
 
@@ -36,13 +40,30 @@ class TestFuncMultiple:
                 ]
             ) == sorted(one.keys())
 
-    async def test_function_return_big_data_exc(self, client_thread: BasThread):
-        def _connect_websocket(port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
-            return connect(
-                f"ws://127.0.0.1:{port}",
-                open_timeout=None,
-            )
+    async def test_function_return_big_data_exc(
+        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+    ):
+        class SocketServicePatched:
+            def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
+                return connect(
+                    f"ws://127.0.0.1:{port}",
+                    open_timeout=None,
+                )
 
-        bas_remote.services.SocketService._connect_websocket = _connect_websocket
-        data = await client_thread.run_function("TestReturnBigData")
-        pass
+        from bas_remote.services import SocketService
+
+        mocker.patch.object(
+            target=bas_remote.services.SocketService,
+            attribute="_connect_websocket",
+            new=SocketServicePatched._connect_websocket,
+        )
+        client = BasRemoteClient(
+            options=client_options,
+            loop=event_loop,
+        )
+
+        await client.start()
+        thread = client.create_thread()
+
+        with pytest.raises(asyncio.exceptions.CancelledError):
+            await thread.run_function("TestReturnBigData")
