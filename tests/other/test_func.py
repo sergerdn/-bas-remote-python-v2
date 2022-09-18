@@ -67,3 +67,6 @@ class TestFuncMultiple:
 
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("TestReturnBigData")
+
+        await thread.stop()
+        await client.close()
