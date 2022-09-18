@@ -87,9 +87,8 @@ class TestFuncMultiple:
         assert proc is not None
 
         with pytest.raises(asyncio.exceptions.CancelledError):
-            t = asyncio.sleep(60)
             proc.terminate()
-            await t
+            await asyncio.sleep(60)
 
         with pytest.raises(psutil.NoSuchProcess):
             for _ in range(0, 60):
