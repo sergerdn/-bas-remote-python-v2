@@ -9,7 +9,7 @@ from zipfile import ZipFile
 
 from aiofiles import open
 from aiohttp import ClientSession
-from filelock import FileLock, Timeout
+from filelock import FileLock, Timeout, BaseFileLock
 from websockets.typing import LoggerLike
 
 from bas_remote.errors import ScriptNotExistError, ScriptNotSupportedError
@@ -28,6 +28,7 @@ class EngineService:
     """The path to the directory in which the archive file of the engine is located."""
 
     logger: LoggerLike
+    _lock: BaseFileLock
 
     def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of EngineService class."""
@@ -40,7 +41,6 @@ class EngineService:
         self._script_name = script_name
 
         self._process = None
-        self._lock = None
 
         if logger is not None:
             self.logger = logger
@@ -121,11 +121,17 @@ class EngineService:
         self.logger.debug(f"start engine process: {cmd}, {cwd}")
 
         self._process = subprocess.Popen(cmd, cwd=cwd)
+        self.lock_acquire()
 
+    def lock_acquire(self):
         lock = self._get_lock_path()
-        self._lock = FileLock(lock)
+        self._lock = FileLock(lock, timeout=5)
         self.logger.debug(f"lock: {self._lock.lock_file}")
         self._lock.acquire()
+
+    def lock_release(self):
+        if self._lock:
+            self._lock.release(force=True)
 
     def _clear_run_directory(self) -> None:
         for dir_path in [name for name in listdir(self._script_dir) if path.isfile(name)]:
@@ -139,9 +145,9 @@ class EngineService:
 
     async def close(self) -> None:
         """Close the engine service."""
-        self.logger.debug("closing...")
+        self.logger.info("closing...")
         self._process.kill()
-        self._lock.release()
+        self.lock_release()
 
 
 def is_locked(lock_path):

@@ -15,14 +15,17 @@ from bas_remote.runners import BasThread
 
 @pytest.mark.asyncio
 class TestFuncMultiple:
+    @pytest.mark.skip("skipped")
     async def test_check_ip(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIp")
         print(result)
 
+    @pytest.mark.skip("skipped")
     async def test_check_ip_json(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIpJson")
         print(result)
 
+    @pytest.mark.skip("skipped")
     async def test_return_big_data(self, client_thread: BasThread):
         data = await client_thread.run_function("TestReturnBigData")
         data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
@@ -42,6 +45,7 @@ class TestFuncMultiple:
                 ]
             ) == sorted(one.keys())
 
+    # @pytest.mark.skip("skipped")
     @pytest.mark.timeout(timeout=60 * 3)
     async def test_task_canceled(
         self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
@@ -100,3 +104,4 @@ class TestFuncMultiple:
         """because process killed and connection closed"""
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("CheckIpJson")
+            pass
