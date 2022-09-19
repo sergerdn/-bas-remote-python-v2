@@ -72,6 +72,8 @@ class TestFuncMultiple:
         with pytest.raises(asyncio.exceptions.CancelledError):
             await thread.run_function("TestReturnBigData")
 
+        await client.close()
+
     @pytest.mark.timeout(timeout=60 * 3)
     async def test_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
         # poetry run pytest tests/other/ -k "test_process_killed"

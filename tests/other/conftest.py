@@ -40,11 +40,11 @@ def event_loop() -> asyncio.AbstractEventLoop:
 
 @pytest.fixture(scope="function")
 def client_options(
-        event_loop: asyncio.AbstractEventLoop,
-        working_dir,
-        remote_script_name,
-        remote_script_user,
-        remote_script_password,
+    event_loop: asyncio.AbstractEventLoop,
+    working_dir,
+    remote_script_name,
+    remote_script_user,
+    remote_script_password,
 ) -> Options:
     yield Options(
         script_name=remote_script_name,
@@ -56,8 +56,8 @@ def client_options(
 
 @pytest.fixture(scope="function")
 def client_thread(
-        event_loop: asyncio.AbstractEventLoop,
-        client_options,
+    event_loop: asyncio.AbstractEventLoop,
+    client_options,
 ) -> BasThread:
     client = BasRemoteClient(
         options=client_options,

@@ -77,9 +77,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
         """should not be reached here in normal situation"""
         self.logger.error(context)
         for task in asyncio.all_tasks(loop=self.loop):
-            coro = task.get_coro()
+            if task.cancelled():
+                continue
             """cancel only stopped task"""
-            if not coro.cr_running:
+            if task.done():
                 self.logger.debug(task)
                 task.cancel("fatal error occurred")
 
