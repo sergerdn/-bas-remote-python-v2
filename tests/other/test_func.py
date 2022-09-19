@@ -70,8 +70,12 @@ class TestFuncMultiple:
         thread = client.create_thread()
 
         """because connection closed"""
-        with pytest.raises(asyncio.CancelledError):
+        try:
             await thread.run_function("TestReturnBigData")
+        except SocketConnectionClosedError as exc:
+            assert True
+        else:
+            assert False
 
         await client.close()
 
@@ -101,7 +105,11 @@ class TestFuncMultiple:
         assert proc_found is True
 
         """because process killed and connection closed"""
-        with pytest.raises(SocketConnectionClosedError):
+        try:
             await thread.run_function("CheckIpJson")
+        except SocketConnectionClosedError as exc:
+            assert True
+        else:
+            assert False
 
-        pass
+        await client.close()
