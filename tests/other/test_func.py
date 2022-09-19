@@ -47,11 +47,12 @@ class TestFuncMultiple:
     async def test_task_websocket_closed_thread(
         self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
+        # poetry run pytest tests/other/ -k "test_task_websocket_closed_thread"
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
                 return connect(
                     f"ws://127.0.0.1:{port}",
-                    open_timeout=None,
+                    open_timeout=10,
                 )
 
         from bas_remote.services import SocketService  # type: ignore
