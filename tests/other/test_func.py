@@ -10,6 +10,7 @@ from websockets.legacy.client import connect
 
 import bas_remote
 from bas_remote import BasRemoteClient, Options
+from bas_remote.errors import SocketConnectionClosedError
 from bas_remote.runners import BasThread
 
 
@@ -43,8 +44,8 @@ class TestFuncMultiple:
             ) == sorted(one.keys())
 
     @pytest.mark.timeout(timeout=60 * 3)
-    async def test_task_websocket_closed(
-            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+    async def test_task_websocket_closed_thread(
+        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
@@ -73,7 +74,6 @@ class TestFuncMultiple:
             await thread.run_function("TestReturnBigData")
 
         await client.close()
-        pass
 
     @pytest.mark.timeout(timeout=60 * 3)
     async def test_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
@@ -100,11 +100,8 @@ class TestFuncMultiple:
                 break
         assert proc_found is True
 
-        await thread.run_function("CheckIpJson")
-        pass
-
         """because process killed and connection closed"""
-        with pytest.raises(asyncio.CancelledError):
+        with pytest.raises(SocketConnectionClosedError):
             await thread.run_function("CheckIpJson")
 
         pass
