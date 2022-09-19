@@ -44,7 +44,7 @@ class TestFuncMultiple:
 
     @pytest.mark.timeout(timeout=60 * 3)
     async def test_task_websocket_closed(
-        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
@@ -69,10 +69,11 @@ class TestFuncMultiple:
         thread = client.create_thread()
 
         """because connection closed"""
-        with pytest.raises(asyncio.exceptions.CancelledError):
+        with pytest.raises(asyncio.CancelledError):
             await thread.run_function("TestReturnBigData")
 
         await client.close()
+        pass
 
     @pytest.mark.timeout(timeout=60 * 3)
     async def test_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
@@ -99,6 +100,11 @@ class TestFuncMultiple:
                 break
         assert proc_found is True
 
+        await thread.run_function("CheckIpJson")
+        pass
+
         """because process killed and connection closed"""
-        with pytest.raises(asyncio.exceptions.CancelledError):
+        with pytest.raises(asyncio.CancelledError):
             await thread.run_function("CheckIpJson")
+
+        pass
