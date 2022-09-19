@@ -13,6 +13,7 @@ from filelock import FileLock, Timeout, BaseFileLock
 from websockets.typing import LoggerLike
 
 from bas_remote.errors import ScriptNotExistError, ScriptNotSupportedError
+from bas_remote.task import TaskCreator
 from bas_remote.types import Script
 
 END_POINT = "https://bablosoft.com"
@@ -30,6 +31,8 @@ class EngineService:
     logger: LoggerLike
     _lock: Optional[BaseFileLock] = None
 
+    _task_creator: TaskCreator
+
     def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of EngineService class."""
         script_name = client.options.script_name
@@ -46,6 +49,8 @@ class EngineService:
             self.logger = logger
         else:
             self.logger = logging.getLogger("[bas-remote:engine]")
+
+        self._task_creator = TaskCreator(loop=self._loop)
 
     async def start(self, port: int) -> None:
         """Asynchronously start the engine service with the specified port.
@@ -108,6 +113,7 @@ class EngineService:
         self.logger.debug(f"extract executable: {zip_path}")
 
         with ZipFile(zip_path, "r") as file:
+
             async def task(name, zip_file: ZipFile):
                 zip_file.extract(name, self._exe_dir, None)
 

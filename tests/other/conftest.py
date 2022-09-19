@@ -28,14 +28,21 @@ def working_dir():
     return test_app_working_dir
 
 
+def get_new_event_loop() -> asyncio.AbstractEventLoop:
+    """Create an instance of the default event loop for each test case."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    loop.set_debug(True)
+    return loop
+
+
 @pytest.fixture(scope="function")
 def event_loop() -> asyncio.AbstractEventLoop:
     """Create an instance of the default event loop for each test case."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    loop = get_new_event_loop()
     yield loop
-    if loop.is_closed():
-        return
-    loop.close()
+    if not loop.is_closed():
+        loop.close()
+    loop.stop()
 
 
 @pytest.fixture(scope="function")
@@ -56,9 +63,9 @@ def client_options(
 
 @pytest.fixture(scope="function")
 def client_thread(
-    event_loop: asyncio.AbstractEventLoop,
     client_options,
 ) -> BasThread:
+    event_loop = get_new_event_loop()
     client = BasRemoteClient(
         options=client_options,
         loop=event_loop,
@@ -71,3 +78,6 @@ def client_thread(
 
     event_loop.run_until_complete(thread.stop())
     event_loop.run_until_complete(client.close())
+    if not event_loop.is_closed():
+        event_loop.close()
+    event_loop.stop()

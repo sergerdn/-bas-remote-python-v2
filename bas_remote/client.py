@@ -14,6 +14,7 @@ from bas_remote.errors import AuthenticationError, ClientNotStartedError
 from bas_remote.options import Options
 from bas_remote.runners import BasFunction, BasThread
 from bas_remote.services import EngineService, SocketService
+from bas_remote.task import TaskCreator
 from bas_remote.types import Message
 
 
@@ -35,6 +36,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
     logger: LoggerLike
     port: int
+    _task_creator: TaskCreator
 
     def __init__(
         self,
@@ -59,11 +61,12 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
         self.on("message_received", self._on_message_received)
         self.on("socket_open", self._on_socket_open)
-        self.on("socket_close", self._on_socket_close)
         if logger is not None:
             self.logger = logger
         else:
             self.logger = logging.getLogger("[bas-remote:client]")
+
+        self._task_creator = TaskCreator(loop=self._loop)
 
     @property
     def is_started(self):
@@ -74,9 +77,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         """should not be reached here in normal situation"""
         self.logger.error(context)
         for task in asyncio.all_tasks(loop=self.loop):
-            task.cancel()
-
-        self._engine.lock_release()
+            self.logger.debug(task)
 
     async def start(self) -> None:
         """Start the client and wait for it initialize."""
@@ -88,11 +89,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 return s.getsockname()[1]
 
-        # port = randint(10000, 20000)
         self.port = find_free_port()
         self.logger.info("running at port: %s" % self.port)
-        await asyncio.wait_for(fut=self._engine.start(self.port), timeout=60)
-        await asyncio.wait_for(fut=self._socket.start(self.port), timeout=60)
+        await self._engine.start(self.port)
+        await self._socket.start(self.port)
         await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_message_received(self, message: Message) -> None:
@@ -122,9 +122,6 @@ class BasRemoteClient(AsyncIOEventEmitter):
                 "login": self.options.login,
             },
         )
-
-    async def _on_socket_close(self, *args, **kwargs) -> None:
-        pass
 
     def run_function(self, function_name: str, function_params: Optional[Dict] = None) -> BasFunction:
         """Call the BAS function asynchronously.
@@ -206,8 +203,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
     async def close(self) -> None:
         """Close the client."""
+        await self._socket.close(expected=True)
+
         await self._engine.close()
-        await self._socket.close(silence=True)
+        self._engine.lock_release()
         self._is_started = False
 
 
