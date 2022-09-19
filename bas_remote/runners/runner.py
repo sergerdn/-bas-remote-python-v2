@@ -1,7 +1,10 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 from asyncio import Future, AbstractEventLoop
 from typing import Optional, Dict
+
+from websockets.typing import LoggerLike
 
 from bas_remote.errors import FunctionError
 from bas_remote.types import Response
@@ -13,8 +16,9 @@ class BasRunner(ABC):
     _future: Future = None
 
     _id: int = 0
+    logger: LoggerLike
 
-    def __init__(self, client):
+    def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of Runner class.
 
         Args:
@@ -22,6 +26,10 @@ class BasRunner(ABC):
         """
         self._loop = client.loop
         self._client = client
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger("[bas-remote:runner]")
 
     def __await__(self):
         return self._future.__await__()

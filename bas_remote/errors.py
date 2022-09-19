@@ -10,6 +10,13 @@ class SocketNotConnectedError(BasError):
         super().__init__(self._message)
 
 
+class SocketConnectionClosedError(BasError):
+    _message = "Cannot connect to the WebSocket server, connection closed."
+
+    def __init__(self):
+        super().__init__(self._message)
+
+
 class ScriptNotSupportedError(BasError):
     _message = "Script engine not supported (Required 22.4.2 or newer)."
 

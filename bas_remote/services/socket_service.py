@@ -9,7 +9,7 @@ from websockets.legacy.client import WebSocketClientProtocol
 from websockets.legacy.client import connect
 from websockets.typing import LoggerLike
 
-from bas_remote.errors import SocketNotConnectedError
+from bas_remote.errors import SocketNotConnectedError, SocketConnectionClosedError
 from bas_remote.task import TaskCreator
 from bas_remote.types import Message
 
@@ -103,11 +103,14 @@ class SocketService:
 
     async def send(self, message: Message) -> int:
         packet = message.to_json() + SEPARATOR  # type: ignore
+
         try:
             await self._socket.send(packet)
         except websockets.exceptions.ConnectionClosedError as exc:
             self.logger.error(exc)
             self._loop.create_task(coro=self.close())
+            raise SocketConnectionClosedError() from exc
+
         self._emit("message_sent", message)
         return message.id_
 
@@ -119,7 +122,6 @@ class SocketService:
 
         if self._socket.closed:
             self.logger.info("connections closed: %s", self._socket.close_sent)
-
             return
 
         await self._socket.close()
