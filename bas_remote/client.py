@@ -73,13 +73,24 @@ class BasRemoteClient(AsyncIOEventEmitter):
         """Gets a value that indicates whether the current client is already running."""
         return self._is_started
 
+    # def _exception_handler(self, loop, context, *args, **kwargs):
+    #     """should not be reached here in normal situation"""
+    #     self.logger.error(context)
+    #     task_with_exc: asyncio.Task = context["future"]
+    #     task_with_exc.print_stack()
+    #     task_with_exc.set_result(None)
+    #     task_with_exc.cancel()
     def _exception_handler(self, loop, context, *args, **kwargs):
         """should not be reached here in normal situation"""
         self.logger.error(context)
         task_with_exc: asyncio.Task = context["future"]
         task_with_exc.print_stack()
-        task_with_exc.set_result(None)
-        self.loop.run_until_complete(self.close())
+
+        for task in asyncio.all_tasks(loop=self.loop):
+            self.logger.debug(task)
+            task.cancel()
+
+        self._engine.lock_release()
 
     async def start(self) -> None:
         """Start the client and wait for it initialize."""
