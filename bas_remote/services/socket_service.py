@@ -82,12 +82,12 @@ class SocketService:
     def _closed(self, expected=False) -> None:
         """Function that is called when the connection is closed."""
         self._emit("socket_close")
-        self._task_creator.create_task_named(coro=self.close())
+        asyncio.gather(self.close(), return_exceptions=True)
 
     def _opened(self) -> None:
         """Function that is called when the connection is opened."""
         self._emit("socket_open")
-        self._task_creator.create_task_named(coro=self.listen())
+        asyncio.gather(self.listen(), return_exceptions=True)
 
     async def listen(self) -> None:
         while True:
