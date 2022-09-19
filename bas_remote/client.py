@@ -208,8 +208,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
     async def close(self) -> None:
         """Close the client."""
-        await self._socket.close(expected=True)
-
+        await self._socket.close()
         await self._engine.close()
         self._engine.lock_release()
         self._is_started = False

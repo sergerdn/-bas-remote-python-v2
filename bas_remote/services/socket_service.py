@@ -82,7 +82,7 @@ class SocketService:
     def _closed(self, expected=False) -> None:
         """Function that is called when the connection is closed."""
         self._emit("socket_close")
-        self._task_creator.create_task_named(coro=self.close(expected=expected))
+        self._task_creator.create_task_named(coro=self.close())
 
     def _opened(self) -> None:
         """Function that is called when the connection is opened."""
@@ -90,7 +90,6 @@ class SocketService:
         self._task_creator.create_task_named(coro=self.listen())
 
     async def listen(self) -> None:
-        expected = False
         while True:
             try:
                 data = await self._socket.recv()
@@ -98,35 +97,32 @@ class SocketService:
             except ConnectionClosedError:
                 break
             except ConnectionClosedOK:
-                expected = True
                 break
         self.logger.info("connection closed")
-        self._closed(expected=expected)
+        self._closed()
 
     async def send(self, message: Message) -> int:
         packet = message.to_json() + SEPARATOR  # type: ignore
-        await self._socket.send(packet)
+        try:
+            await self._socket.send(packet)
+        except websockets.exceptions.ConnectionClosedError as exc:
+            self.logger.error(exc)
+            self._loop.create_task(coro=self.close())
         self._emit("message_sent", message)
         return message.id_
 
-    async def close(self, expected=False) -> None:
+    async def close(self) -> None:
         """Close the socket service."""
-        exc = SocketClosedException("connections accidentally closed: %s", self._socket.close_sent)
 
         if not self.is_connected:
-            if not expected:
-                raise exc
             return
 
         if self._socket.closed:
             self.logger.info("connections closed: %s", self._socket.close_sent)
-            if not expected:
-                raise exc
+
             return
 
         await self._socket.close()
-        if not expected:
-            raise exc
 
 
 __all__ = ["SocketService"]
