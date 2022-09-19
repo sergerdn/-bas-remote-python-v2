@@ -80,8 +80,8 @@ class TestFuncMultiple:
         await client.close()
 
     @pytest.mark.timeout(timeout=60 * 3)
-    async def test_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
-        # poetry run pytest tests/other/ -k "test_process_killed"
+    async def test_process_killed_thread(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
+        # poetry run pytest tests/other/ -k "test_process_killed_thread"
         client = BasRemoteClient(
             options=client_options,
             loop=event_loop,
@@ -98,7 +98,7 @@ class TestFuncMultiple:
                     proc.terminate()
                     with pytest.raises(psutil.NoSuchProcess):
                         for _ in range(0, 60):
-                            time.sleep(1)
+                            await asyncio.sleep(1)
                             psutil.Process(pid=proc.pid)
             if proc_found:
                 break
