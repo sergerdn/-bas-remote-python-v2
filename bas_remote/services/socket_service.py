@@ -79,7 +79,7 @@ class SocketService:
             self._emit("message_received", unpacked)
         self._buffer = buffer.pop()
 
-    def _closed(self, expected=False) -> None:
+    def _closed(self) -> None:
         """Function that is called when the connection is closed."""
         self._emit("socket_close")
         asyncio.gather(self.close(), return_exceptions=True)

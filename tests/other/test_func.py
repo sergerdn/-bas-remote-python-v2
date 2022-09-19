@@ -53,7 +53,7 @@ class TestFuncMultiple:
                     open_timeout=None,
                 )
 
-        from bas_remote.services import SocketService  # # type: ignore[F401]
+        from bas_remote.services import SocketService  # type: ignore
 
         mocker.patch.object(
             target=bas_remote.services.SocketService,
