@@ -46,7 +46,7 @@ class SocketService:
         return connect(
             f"ws://127.0.0.1:{port}",
             open_timeout=10,
-            # max_size=None,
+            max_size=None,
         )
 
     async def start(self, port: int) -> None:
