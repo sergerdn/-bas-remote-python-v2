@@ -113,11 +113,11 @@ class SocketService:
         except websockets.exceptions.ConnectionClosedError as exc:
             self.logger.error(exc)
             await asyncio.gather(self.close(), return_exceptions=False)
-            raise NetworkFatalError() from exc
+            raise NetworkFatalError from exc
         except Exception as exc:
             self.logger.error(exc)
             await asyncio.gather(self.close(), return_exceptions=False)
-            raise NetworkFatalError() from exc
+            raise NetworkFatalError from exc
 
         self._emit("message_sent", message)
         return message.id_
