@@ -90,10 +90,7 @@ class TestFuncMultiple:
 
         """because connection closed"""
         try:
-            await asyncio.wait_for(thread.run_function("TestReturnBigData"), timeout=30)
-            # await thread.run_function("TestReturnBigData")
-        except Exception as exc:
-            assert False
+            await thread.run_function("TestReturnBigData")
         except FunctionFatalError as exc:
             assert True
         else:
