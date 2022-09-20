@@ -29,6 +29,7 @@ class SocketService:
     logger: LoggerLike
     _loop: AbstractEventLoop
     _task_creator: TaskCreator
+    _last_message: Optional[Message] = None
 
     def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of SocketService class."""
@@ -45,7 +46,7 @@ class SocketService:
         return connect(
             f"ws://127.0.0.1:{port}",
             open_timeout=10,
-            max_size=None,
+           # max_size=None,
         )
 
     async def start(self, port: int) -> None:
@@ -79,6 +80,9 @@ class SocketService:
             self._emit("message_received", unpacked)
         self._buffer = buffer.pop()
 
+    def _process_error(self, exc: Exception) -> None:
+        self._emit("fatal_received", exc)
+
     def _closed(self) -> None:
         """Function that is called when the connection is closed."""
         self._emit("socket_close")
@@ -87,7 +91,10 @@ class SocketService:
     def _opened(self) -> None:
         """Function that is called when the connection is opened."""
         self._emit("socket_open")
-        asyncio.gather(self.listen(), return_exceptions=True)
+        try:
+            asyncio.gather(self.listen(), return_exceptions=True)
+        except Exception as exc:
+            pass
 
     async def listen(self) -> None:
         while True:
@@ -98,6 +105,7 @@ class SocketService:
                 break
             except ConnectionClosedError as exc:
                 self.logger.error(exc)
+                self._process_error(exc=exc)
                 raise NetworkFatalError() from exc
             except Exception as exc:
                 self.logger.error(exc)
@@ -106,6 +114,7 @@ class SocketService:
         self._closed()
 
     async def send(self, message: Message) -> int:
+        self._last_message = message
         packet = message.to_json() + SEPARATOR  # type: ignore
 
         try:

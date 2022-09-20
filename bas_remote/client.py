@@ -10,7 +10,7 @@ from typing import Callable, Optional, Dict, Any
 from pyee.asyncio import AsyncIOEventEmitter
 from websockets.typing import LoggerLike
 
-from bas_remote.errors import AuthenticationError, ClientNotStartedError, FunctionFatalError
+from bas_remote.errors import AuthenticationError, ClientNotStartedError
 from bas_remote.options import Options
 from bas_remote.runners import BasFunction, BasThread
 from bas_remote.services import EngineService, SocketService
@@ -60,6 +60,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         self._socket = SocketService(self)
 
         self.on("message_received", self._on_message_received)
+        self.on("fatal_received_", self._on_fatal_received)
         self.on("socket_open", self._on_socket_open)
         if logger is not None:
             self.logger = logger
@@ -96,6 +97,9 @@ class BasRemoteClient(AsyncIOEventEmitter):
         await asyncio.wait_for(fut=self._engine.start(self.port), timeout=360)
         await asyncio.wait_for(fut=self._socket.start(self.port), timeout=60)
         await asyncio.wait_for(fut=self._future, timeout=60)
+
+    async def _on_fatal_received(self, exc: Exception) -> None:
+        pass
 
     async def _on_message_received(self, message: Message) -> None:
         self.logger.debug("message received: %s" % message)
