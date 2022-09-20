@@ -46,7 +46,7 @@ class SocketService:
         return connect(
             f"ws://127.0.0.1:{port}",
             open_timeout=10,
-           # max_size=None,
+            # max_size=None,
         )
 
     async def start(self, port: int) -> None:
@@ -91,10 +91,7 @@ class SocketService:
     def _opened(self) -> None:
         """Function that is called when the connection is opened."""
         self._emit("socket_open")
-        try:
-            asyncio.gather(self.listen(), return_exceptions=True)
-        except Exception as exc:
-            pass
+        asyncio.gather(self.listen(), return_exceptions=True)
 
     async def listen(self) -> None:
         while True:
@@ -106,10 +103,11 @@ class SocketService:
             except ConnectionClosedError as exc:
                 self.logger.error(exc)
                 self._process_error(exc=exc)
-                raise NetworkFatalError() from exc
+                break
             except Exception as exc:
                 self.logger.error(exc)
-                raise NetworkFatalError() from exc
+                self._process_error(exc=exc)
+                break
         self.logger.info("connection closed")
         self._closed()
 

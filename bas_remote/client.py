@@ -39,10 +39,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
     _task_creator: TaskCreator
 
     def __init__(
-            self,
-            options: Options,
-            loop: Optional[asyncio.AbstractEventLoop] = None,
-            logger: Optional[LoggerLike] = None,
+        self,
+        options: Options,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+        logger: Optional[LoggerLike] = None,
     ):
         """Create an instance of BasRemoteClient class.
 
@@ -60,7 +60,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         self._socket = SocketService(self)
 
         self.on("message_received", self._on_message_received)
-        self.on("fatal_received_", self._on_fatal_received)
+        self.on("fatal_received", self._on_fatal_received)
         self.on("socket_open", self._on_socket_open)
         if logger is not None:
             self.logger = logger
@@ -99,7 +99,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
         await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_fatal_received(self, exc: Exception) -> None:
-        pass
+        for _id, callback in self._requests.items():
+            # "{"Message":"ReferenceError: Can't find variable: Blaaa during execution of action ","Result":null,"Success":false}"
+            data = '{"Message":"{exc}","Result":null,"Success":false}'.format(exc=exc)
+            callback(data)
 
     async def _on_message_received(self, message: Message) -> None:
         self.logger.debug("message received: %s" % message)

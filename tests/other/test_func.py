@@ -63,7 +63,7 @@ class TestFuncMultiple:
 
     @pytest.mark.timeout(timeout=60)
     async def test_task_websocket_closed_thread(
-            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         # poetry run pytest tests/other/ -k "test_task_websocket_closed_thread"
         class SocketServicePatched:

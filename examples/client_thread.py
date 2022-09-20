@@ -18,7 +18,7 @@ async def main():
 
     await client.start()
     client_thread = client.create_thread()
-    await client_thread.run_function("Blaaa")
+    # await client_thread.run_function("Blaaa")
 
     data = await client_thread.run_function("TestReturnBigData")
     data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
