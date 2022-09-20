@@ -61,7 +61,7 @@ class TestFuncMultiple:
                 ]
             ) == sorted(one.keys())
 
-    @pytest.mark.timeout(timeout=60)
+    @pytest.mark.timeout(timeout=60 * 3)
     async def test_task_websocket_closed_thread(
         self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
@@ -87,6 +87,7 @@ class TestFuncMultiple:
 
         await client.start()
         thread = client.create_thread()
+        await thread.start()
 
         """because connection closed"""
         try:
