@@ -9,7 +9,7 @@ from websockets.legacy.client import connect
 
 import bas_remote
 from bas_remote import BasRemoteClient, Options
-from bas_remote.errors import FunctionFatalError, NetworkFatalError
+from bas_remote.errors import FunctionFatalError
 from bas_remote.runners import BasThread
 
 
@@ -31,14 +31,17 @@ async def kill_process(working_dir: str) -> bool:
 
 @pytest.mark.asyncio
 class TestFuncMultiple:
+    @pytest.mark.skip("skipped")
     async def test_check_ip(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIp")
         print(result)
 
+    @pytest.mark.skip("skipped")
     async def test_check_ip_json(self, client_thread: BasThread):
         result = await client_thread.run_function("CheckIpJson")
         print(result)
 
+    @pytest.mark.skip("skipped")
     async def test_return_big_data(self, client_thread: BasThread):
         data = await client_thread.run_function("TestReturnBigData")
         data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
@@ -87,8 +90,11 @@ class TestFuncMultiple:
 
         """because connection closed"""
         try:
-            await thread.run_function("TestReturnBigData")
-        except NetworkFatalError as exc:
+            await asyncio.wait_for(thread.run_function("TestReturnBigData"), timeout=10)
+            # await thread.run_function("TestReturnBigData")
+        except Exception as exc:
+            assert False
+        except FunctionFatalError as exc:
             assert True
         else:
             assert False

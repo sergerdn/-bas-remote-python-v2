@@ -10,7 +10,7 @@ from typing import Callable, Optional, Dict, Any
 from pyee.asyncio import AsyncIOEventEmitter
 from websockets.typing import LoggerLike
 
-from bas_remote.errors import AuthenticationError, ClientNotStartedError
+from bas_remote.errors import AuthenticationError, ClientNotStartedError, FunctionFatalError
 from bas_remote.options import Options
 from bas_remote.runners import BasFunction, BasThread
 from bas_remote.services import EngineService, SocketService
@@ -39,10 +39,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
     _task_creator: TaskCreator
 
     def __init__(
-        self,
-        options: Options,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
-        logger: Optional[LoggerLike] = None,
+            self,
+            options: Options,
+            loop: Optional[asyncio.AbstractEventLoop] = None,
+            logger: Optional[LoggerLike] = None,
     ):
         """Create an instance of BasRemoteClient class.
 
