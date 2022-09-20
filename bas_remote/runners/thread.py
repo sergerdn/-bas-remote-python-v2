@@ -29,6 +29,7 @@ class BasThread(BasRunner):
         return self
 
     async def _run_function(self, name: str, params: Optional[Dict] = None) -> None:
+        """Start thread execution."""
         await self.start()
 
         self._is_running = True
