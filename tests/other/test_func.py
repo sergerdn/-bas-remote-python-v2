@@ -60,7 +60,7 @@ class TestFuncMultiple:
 
     @pytest.mark.timeout(timeout=60)
     async def test_task_websocket_closed_thread(
-            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         # poetry run pytest tests/other/ -k "test_task_websocket_closed_thread"
         class SocketServicePatched:
@@ -105,6 +105,7 @@ class TestFuncMultiple:
 
         await client.start()
         thread = client.create_thread()
+        await thread.start()
         await thread.run_function("CheckIpJson")
 
         assert await kill_process(client.options.working_dir) is True
