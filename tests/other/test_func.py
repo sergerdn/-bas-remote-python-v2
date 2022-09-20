@@ -116,10 +116,11 @@ class TestFuncMultiple:
 
         """because process killed and connection closed"""
         try:
-            await thread.run_function("CheckIpJson")
-        except FunctionFatalError as exc:
-            assert True
-        else:
-            assert False
-
-        await client.close()
+            try:
+                await thread.run_function("CheckIpJson")
+            except FunctionFatalError as exc:
+                assert True
+            else:
+                assert False
+        finally:
+            await client.close()
