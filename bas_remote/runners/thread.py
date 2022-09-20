@@ -29,9 +29,6 @@ class BasThread(BasRunner):
         return self
 
     async def _run_function(self, name: str, params: Optional[Dict] = None) -> None:
-        if self.id and self.is_running:
-            raise AlreadyRunningError()
-
         await self.start()
 
         self._is_running = True
@@ -39,6 +36,8 @@ class BasThread(BasRunner):
         self._is_running = False
 
     async def start(self) -> None:
+        if self.id and self.is_running:
+            raise AlreadyRunningError()
         if not self.id:
             self._id = randint(1000000, 9999999)
             await self._client.start_thread(self.id)
