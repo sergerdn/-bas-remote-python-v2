@@ -91,13 +91,14 @@ class TestFuncMultiple:
 
         """because connection closed"""
         try:
-            await thread.run_function("TestReturnBigData")
-        except FunctionFatalError as exc:
-            assert True
-        else:
-            assert False
-
-        await client.close()
+            try:
+                await thread.run_function("TestReturnBigData")
+            except FunctionFatalError as exc:
+                assert True
+            else:
+                assert False
+        finally:
+            await client.close()
 
     @pytest.mark.timeout(timeout=60 * 3)
     async def test_process_killed_thread(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
