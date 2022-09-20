@@ -39,10 +39,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
     _task_creator: TaskCreator
 
     def __init__(
-        self,
-        options: Options,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
-        logger: Optional[LoggerLike] = None,
+            self,
+            options: Options,
+            loop: Optional[asyncio.AbstractEventLoop] = None,
+            logger: Optional[LoggerLike] = None,
     ):
         """Create an instance of BasRemoteClient class.
 
@@ -93,8 +93,8 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
         self.port = find_free_port()
         self.logger.info("running at port: %s" % self.port)
-        await asyncio.gather(self._engine.start(self.port), return_exceptions=True)
-        await asyncio.gather(self._socket.start(self.port), return_exceptions=True)
+        await asyncio.wait_for(fut=self._engine.start(self.port), timeout=360)
+        await asyncio.wait_for(fut=self._socket.start(self.port), timeout=60)
         await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_message_received(self, message: Message) -> None:
