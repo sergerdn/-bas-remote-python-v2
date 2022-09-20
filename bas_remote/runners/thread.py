@@ -33,16 +33,8 @@ class BasThread(BasRunner):
             raise AlreadyRunningError()
 
         if not self.id:
-            self._id = randint(1, 1000000)
-            try:
-                await self._client.start_thread(self.id)
-            except Exception as exc:
-                self.logger.error(exc)
-                self._future.set_exception(exc)
-                self._future.set_result(None)
-                self._future.cancel()
-                self._is_running = False
-                return
+            self._id = randint(1000000, 9999999)
+            await self._client.start_thread(self.id)
 
         self._is_running = True
         await self._run_task(name, params)

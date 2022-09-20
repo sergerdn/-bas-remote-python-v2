@@ -39,10 +39,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
     _task_creator: TaskCreator
 
     def __init__(
-        self,
-        options: Options,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
-        logger: Optional[LoggerLike] = None,
+            self,
+            options: Options,
+            loop: Optional[asyncio.AbstractEventLoop] = None,
+            logger: Optional[LoggerLike] = None,
     ):
         """Create an instance of BasRemoteClient class.
 
@@ -75,8 +75,11 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
     def _exception_handler(self, loop, context, *args, **kwargs):
         """should not be reached here in normal situation"""
-        self.logger.error(context)
-        self._engine.lock_release()
+        self.logger.fatal(context)
+        for task in asyncio.all_tasks(self.loop):
+            task.cancel()
+        #self.loop.stop()
+        pass
 
     async def start(self) -> None:
         """Start the client and wait for it initialize."""
