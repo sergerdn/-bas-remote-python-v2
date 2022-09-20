@@ -13,6 +13,22 @@ from bas_remote.errors import FunctionFatalError, NetworkFatalError
 from bas_remote.runners import BasThread
 
 
+async def kill_process(working_dir: str) -> bool:
+    proc_found = False
+    for proc in psutil.process_iter():
+        if proc.name() == "FastExecuteScript.exe":
+            if working_dir in proc.cmdline()[0]:
+                proc_found = True
+                proc.terminate()
+                with pytest.raises(psutil.NoSuchProcess):
+                    for _ in range(0, 60):
+                        await asyncio.sleep(1)
+                        psutil.Process(pid=proc.pid)
+        if proc_found:
+            break
+    return proc_found
+
+
 @pytest.mark.asyncio
 class TestFuncMultiple:
     async def test_check_ip(self, client_thread: BasThread):
@@ -44,7 +60,7 @@ class TestFuncMultiple:
 
     @pytest.mark.timeout(timeout=60)
     async def test_task_websocket_closed_thread(
-        self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
+            self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
         # poetry run pytest tests/other/ -k "test_task_websocket_closed_thread"
         class SocketServicePatched:
@@ -91,19 +107,7 @@ class TestFuncMultiple:
         thread = client.create_thread()
         await thread.run_function("CheckIpJson")
 
-        proc_found = False
-        for proc in psutil.process_iter():
-            if proc.name() == "FastExecuteScript.exe":
-                if client.options.working_dir in proc.cmdline()[0]:
-                    proc_found = True
-                    proc.terminate()
-                    with pytest.raises(psutil.NoSuchProcess):
-                        for _ in range(0, 60):
-                            await asyncio.sleep(1)
-                            psutil.Process(pid=proc.pid)
-            if proc_found:
-                break
-        assert proc_found is True
+        assert await kill_process(client.options.working_dir) is True
 
         """because process killed and connection closed"""
         try:
