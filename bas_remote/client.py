@@ -81,7 +81,6 @@ class BasRemoteClient(AsyncIOEventEmitter):
         self.logger.error(context)
         for task in asyncio.all_tasks(self.loop):
             task.cancel()
-        # self.loop.stop()
         pass
 
     async def start(self) -> None:
