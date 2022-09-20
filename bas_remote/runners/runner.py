@@ -59,7 +59,7 @@ class BasRunner(ABC):
         try:
             result = await self._client.send_async(
                 "run_task",
-                {"params": json.dumps(params if params else {}), "function_name": name, "thread_id": self.id}
+                {"params": json.dumps(params if params else {}), "function_name": name, "thread_id": self.id},
             )
         except NetworkFatalError as exc:
             self.logger.error(exc)

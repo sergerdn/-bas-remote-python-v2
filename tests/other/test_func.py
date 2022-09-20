@@ -9,7 +9,7 @@ from websockets.legacy.client import connect
 
 import bas_remote
 from bas_remote import BasRemoteClient, Options
-from bas_remote.errors import NetworkFatalError, FunctionFatalError
+from bas_remote.errors import FunctionFatalError, NetworkFatalError
 from bas_remote.runners import BasThread
 
 

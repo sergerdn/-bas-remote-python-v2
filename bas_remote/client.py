@@ -194,7 +194,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         """
         await self.send("stop_thread", {"thread_id": thread_id})
 
-    def create_thread(self,start=False) -> BasThread:
+    def create_thread(self, start=False) -> BasThread:
         """Create new BAS thread object.
 
         Returns:
