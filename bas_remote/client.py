@@ -93,8 +93,8 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
         self.port = find_free_port()
         self.logger.info("running at port: %s" % self.port)
-        await self._engine.start(self.port)
-        await self._socket.start(self.port)
+        await asyncio.gather(self._engine.start(self.port), return_exceptions=True)
+        await asyncio.gather(self._socket.start(self.port), return_exceptions=True)
         await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_message_received(self, message: Message) -> None:
