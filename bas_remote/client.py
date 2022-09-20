@@ -81,7 +81,6 @@ class BasRemoteClient(AsyncIOEventEmitter):
         self.logger.error(context)
         for task in asyncio.all_tasks(self.loop):
             task.cancel()
-        pass
 
     async def start(self) -> None:
         """Start the client and wait for it initialize."""
