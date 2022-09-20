@@ -99,9 +99,9 @@ class BasRemoteClient(AsyncIOEventEmitter):
         await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_fatal_received(self, exc: Exception) -> None:
+        """cancel all tasks, because fatal exception"""
         for _id, callback in self._requests.items():
-            # "{"Message":"ReferenceError: Can't find variable: Blaaa during execution of action ","Result":null,"Success":false}"
-            data = '{"Message":"{exc}","Result":null,"Success":false}'.format(exc=exc)
+            data = '{"Message":"FunctionFatalError: %s","Result":null,"Success":false}' % exc
             callback(data)
 
     async def _on_message_received(self, message: Message) -> None:

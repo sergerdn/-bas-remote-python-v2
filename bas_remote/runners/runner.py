@@ -74,7 +74,12 @@ class BasRunner(ABC):
 
         response = Response.from_json(result)  # type: ignore
         if not response.success:
-            exception = FunctionError(response.message)
+            m = response.message
+            if m.startswith("FunctionFatalError:"):
+                m = m.lstrip("FunctionFatalError:").strip()
+                exception = FunctionFatalError(m)
+            else:
+                exception = FunctionError(m)
             self._future.set_exception(exception)
         else:
             self._future.set_result(response.result)
