@@ -6,7 +6,7 @@ from typing import Optional, Dict
 
 from websockets.typing import LoggerLike
 
-from bas_remote.errors import FunctionError
+from bas_remote.errors import FunctionError, NetworkFatalError, FunctionFatalError
 from bas_remote.types import Response
 
 
@@ -56,9 +56,22 @@ class BasRunner(ABC):
             name (str): BAS function name as string.
             params (dict, optional): BAS function arguments list.
         """
-        result = await self._client.send_async(
-            "run_task", {"params": json.dumps(params if params else {}), "function_name": name, "thread_id": self.id}
-        )
+        try:
+            result = await self._client.send_async(
+                "run_task",
+                {"params": json.dumps(params if params else {}), "function_name": name, "thread_id": self.id}
+            )
+        except NetworkFatalError as exc:
+            self.logger.error(exc)
+            exception = FunctionFatalError(str(exc))
+            self._future.set_exception(exception)
+            return
+        except Exception as exc:
+            self.logger.error(exc)
+            exception = FunctionFatalError(str(exc))
+            self._future.set_exception(exception)
+            return
+
         response = Response.from_json(result)  # type: ignore
         if not response.success:
             exception = FunctionError(response.message)

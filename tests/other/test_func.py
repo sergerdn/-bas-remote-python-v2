@@ -9,7 +9,7 @@ from websockets.legacy.client import connect
 
 import bas_remote
 from bas_remote import BasRemoteClient, Options
-from bas_remote.errors import NetworkFatalError
+from bas_remote.errors import NetworkFatalError, FunctionFatalError
 from bas_remote.runners import BasThread
 
 
@@ -108,7 +108,7 @@ class TestFuncMultiple:
         """because process killed and connection closed"""
         try:
             await thread.run_function("CheckIpJson")
-        except NetworkFatalError as exc:
+        except FunctionFatalError as exc:
             assert True
         else:
             assert False

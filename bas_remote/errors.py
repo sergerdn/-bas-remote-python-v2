@@ -53,6 +53,11 @@ class FunctionError(BasError):
         super().__init__(message)
 
 
+class FunctionFatalError(BasError):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 class NetworkFatalError(BasError):
     _message = "Can not communicate with WebSocket server, connection closed or broken."
 

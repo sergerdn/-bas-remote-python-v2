@@ -1,7 +1,7 @@
 from random import randint
 from typing import Optional, Dict
 
-from bas_remote.errors import AlreadyRunningError, exception_handler
+from bas_remote.errors import AlreadyRunningError
 from bas_remote.runners.runner import BasRunner
 
 
@@ -28,7 +28,6 @@ class BasThread(BasRunner):
         self._run(name, params)
         return self
 
-    @exception_handler
     async def _run_function(self, name: str, params: Optional[Dict] = None) -> None:
         if self.id and self.is_running:
             raise AlreadyRunningError()
