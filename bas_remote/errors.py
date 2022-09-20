@@ -10,7 +10,7 @@ class SocketNotConnectedError(BasError):
         super().__init__(self._message)
 
 
-class SocketConnectionClosedError(BasError):
+class NetworkFatalError(BasError):
     _message = "Cannot connect to the WebSocket server, connection closed."
 
     def __init__(self):
