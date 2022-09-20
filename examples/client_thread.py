@@ -19,12 +19,13 @@ async def main():
     await client.start()
     client_thread = client.create_thread()
 
-    data = await client_thread.run_function("TestReturnBigData")
-    data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
-    print(data_obj[0])
-
-    await client_thread.stop()
-    await client.close()
+    try:
+        data = await client_thread.run_function("TestReturnBigData")
+        data_obj = yaml.load(data, Loader=yaml.UnsafeLoader)
+        print(data_obj[0])
+    finally:
+        await client_thread.stop()
+        await client.close()
 
 
 if __name__ == "__main__":

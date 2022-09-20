@@ -16,12 +16,12 @@ async def main():
 
     await client.start()
 
-    result = await client.run_function("GoogleSearch", {"Query": "cats"})
-
-    for link in result:
-        print(link)
-
-    await client.close()
+    try:
+        result = await client.run_function("GoogleSearch", {"Query": "cats"})
+        for link in result:
+            print(link)
+    finally:
+        await client.close()
 
 
 if __name__ == "__main__":

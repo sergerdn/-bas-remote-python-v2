@@ -1,5 +1,4 @@
 import asyncio
-import time
 
 import psutil
 import pytest
@@ -10,7 +9,27 @@ from websockets.legacy.client import connect
 
 import bas_remote
 from bas_remote import BasRemoteClient, Options
+from bas_remote.errors import FunctionFatalError
 from bas_remote.runners import BasThread
+
+
+async def kill_process(working_dir: str) -> bool:
+    proc_found = False
+    for proc in psutil.process_iter():
+        if proc.name() == "FastExecuteScript.exe":
+            if working_dir in proc.cmdline()[0]:
+                proc_found = True
+                proc.terminate()
+                while 1:
+                    await asyncio.sleep(1)
+                    try:
+                        psutil.Process(pid=proc.pid)
+                    except psutil.NoSuchProcess:
+                        break
+        if proc_found:
+            break
+
+    return proc_found
 
 
 @pytest.mark.asyncio
@@ -43,17 +62,18 @@ class TestFuncMultiple:
             ) == sorted(one.keys())
 
     @pytest.mark.timeout(timeout=60 * 3)
-    async def test_task_canceled(
+    async def test_task_websocket_closed_thread(
         self, client_options: Options, event_loop: asyncio.AbstractEventLoop, mocker: MockerFixture
     ):
+        # poetry run pytest tests/other/ -k "test_task_websocket_closed_thread"
         class SocketServicePatched:
             def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
                 return connect(
                     f"ws://127.0.0.1:{port}",
-                    open_timeout=None,
+                    open_timeout=10,
                 )
 
-        from bas_remote.services import SocketService
+        from bas_remote.services import SocketService  # type: ignore
 
         mocker.patch.object(
             target=bas_remote.services.SocketService,
@@ -67,14 +87,22 @@ class TestFuncMultiple:
 
         await client.start()
         thread = client.create_thread()
+        await thread.start()
 
         """because connection closed"""
-        with pytest.raises(asyncio.exceptions.CancelledError):
-            await thread.run_function("TestReturnBigData")
+        try:
+            try:
+                await thread.run_function("TestReturnBigData")
+            except FunctionFatalError as exc:
+                assert True
+            else:
+                assert False
+        finally:
+            await client.close()
 
     @pytest.mark.timeout(timeout=60 * 3)
-    async def test_process_killed(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
-        # poetry run pytest tests/other/ -k "test_process_killed"
+    async def test_process_killed_thread(self, client_options: Options, event_loop: asyncio.AbstractEventLoop):
+        # poetry run pytest tests/other/ -k "test_process_killed_thread"
         client = BasRemoteClient(
             options=client_options,
             loop=event_loop,
@@ -82,21 +110,17 @@ class TestFuncMultiple:
 
         await client.start()
         thread = client.create_thread()
+        await thread.start()
 
-        proc_found = False
-        for proc in psutil.process_iter():
-            if proc.name() == "FastExecuteScript.exe":
-                if client.options.working_dir in proc.cmdline()[0]:
-                    proc_found = True
-                    proc.terminate()
-                    with pytest.raises(psutil.NoSuchProcess):
-                        for _ in range(0, 60):
-                            time.sleep(1)
-                            psutil.Process(pid=proc.pid)
-            if proc_found:
-                break
-        assert proc_found is True
+        assert await kill_process(client.options.working_dir) is True
 
         """because process killed and connection closed"""
-        with pytest.raises(asyncio.exceptions.CancelledError):
-            await thread.run_function("CheckIpJson")
+        try:
+            try:
+                await thread.run_function("CheckIpJson")
+            except FunctionFatalError as exc:
+                assert True
+            else:
+                assert False
+        finally:
+            await client.close()

@@ -1,9 +1,12 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 from asyncio import Future, AbstractEventLoop
 from typing import Optional, Dict
 
-from bas_remote.errors import FunctionError
+from websockets.typing import LoggerLike
+
+from bas_remote.errors import FunctionError, NetworkFatalError, FunctionFatalError
 from bas_remote.types import Response
 
 
@@ -13,8 +16,9 @@ class BasRunner(ABC):
     _future: Future = None
 
     _id: int = 0
+    logger: LoggerLike
 
-    def __init__(self, client):
+    def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of Runner class.
 
         Args:
@@ -22,6 +26,10 @@ class BasRunner(ABC):
         """
         self._loop = client.loop
         self._client = client
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger("[bas-remote:runner]")
 
     def __await__(self):
         return self._future.__await__()
@@ -48,12 +56,30 @@ class BasRunner(ABC):
             name (str): BAS function name as string.
             params (dict, optional): BAS function arguments list.
         """
-        result = await self._client.send_async(
-            "run_task", {"params": json.dumps(params if params else {}), "function_name": name, "thread_id": self.id}
-        )
+        try:
+            result = await self._client.send_async(
+                "run_task",
+                {"params": json.dumps(params if params else {}), "function_name": name, "thread_id": self.id},
+            )
+        except NetworkFatalError as exc:
+            self.logger.error(exc)
+            exception = FunctionFatalError(str(exc))
+            self._future.set_exception(exception)
+            return
+        except Exception as exc:
+            self.logger.error(exc)
+            exception = FunctionFatalError(str(exc))
+            self._future.set_exception(exception)
+            return
+
         response = Response.from_json(result)  # type: ignore
         if not response.success:
-            exception = FunctionError(response.message)
+            m = response.message
+            if m.startswith("FunctionFatalError:"):
+                m = m.lstrip("FunctionFatalError:").strip()
+                exception = FunctionFatalError(m)
+            else:
+                exception = FunctionError(m)
             self._future.set_exception(exception)
         else:
             self._future.set_result(response.result)

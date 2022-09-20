@@ -1,3 +1,6 @@
+import inspect
+
+
 class BasError(Exception):
     def __init__(self, message: str):
         self.message = message
@@ -50,6 +53,40 @@ class FunctionError(BasError):
         super().__init__(message)
 
 
+class FunctionFatalError(BasError):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class NetworkFatalError(BasError):
+    _message = "Can not communicate with WebSocket server, connection closed or broken."
+
+    def __init__(self):
+        super().__init__(self._message)
+
+
+class UnhandledException(BasError):
+    _message = "Unhandled exception occurred"
+
+    def __init__(self):
+        super().__init__(self._message)
+
+
+def exception_handler(f):
+    async def inner_function(*args, **kwargs):
+        try:
+            if inspect.iscoroutinefunction(f):
+                return await f(*args, **kwargs)
+            else:
+                return f(*args, **kwargs)
+        except NetworkFatalError as exc:
+            raise NetworkFatalError() from exc
+        except Exception as exc:
+            raise UnhandledException() from exc
+
+    return inner_function
+
+
 __all__ = [
     "SocketNotConnectedError",
     "ScriptNotSupportedError",
@@ -59,4 +96,6 @@ __all__ = [
     "AlreadyRunningError",
     "FunctionError",
     "BasError",
+    "NetworkFatalError",
+    "exception_handler",
 ]

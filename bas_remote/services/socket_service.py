@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from asyncio import AbstractEventLoop
 from typing import Optional
 
 import websockets.legacy.client
@@ -8,7 +9,8 @@ from websockets.legacy.client import WebSocketClientProtocol
 from websockets.legacy.client import connect
 from websockets.typing import LoggerLike
 
-from bas_remote.errors import SocketNotConnectedError
+from bas_remote.errors import SocketNotConnectedError, NetworkFatalError, UnhandledException
+from bas_remote.task import TaskCreator
 from bas_remote.types import Message
 
 SEPARATOR = "---Message--End---"
@@ -25,6 +27,9 @@ class SocketService:
 
     _buffer: str = ""
     logger: LoggerLike
+    _loop: AbstractEventLoop
+    _task_creator: TaskCreator
+    _last_message: Optional[Message] = None
 
     def __init__(self, client, logger: Optional[LoggerLike] = None):
         """Create an instance of SocketService class."""
@@ -34,6 +39,8 @@ class SocketService:
             self.logger = logger
         else:
             self.logger = logging.getLogger("[bas-remote:socket]")
+
+        self._task_creator = TaskCreator(loop=self._loop)
 
     def _connect_websocket(self, port: int, *args, **kwargs) -> websockets.legacy.client.Connect:
         return connect(
@@ -73,52 +80,66 @@ class SocketService:
             self._emit("message_received", unpacked)
         self._buffer = buffer.pop()
 
+    def _process_error(self, exc: Exception) -> None:
+        self._emit("fatal_received", exc)
+
     def _closed(self) -> None:
         """Function that is called when the connection is closed."""
         self._emit("socket_close")
-        self._loop.create_task(self.close())
+        asyncio.gather(self.close(), return_exceptions=True)
 
     def _opened(self) -> None:
         """Function that is called when the connection is opened."""
         self._emit("socket_open")
-        self._loop.create_task(self.listen())
+        asyncio.gather(self.listen(), return_exceptions=True)
 
     async def listen(self) -> None:
         while True:
             try:
                 data = await self._socket.recv()
                 self._process_data(data)
-            except ConnectionClosedError:
-                break
             except ConnectionClosedOK:
+                break
+            except ConnectionClosedError as exc:
+                self.logger.error(exc)
+                self._process_error(exc=exc)
+                break
+            except Exception as exc:
+                self.logger.error(exc)
+                self._process_error(exc=exc)
                 break
         self.logger.info("connection closed")
         self._closed()
 
     async def send(self, message: Message) -> int:
+        self._last_message = message
         packet = message.to_json() + SEPARATOR  # type: ignore
-        await self._socket.send(packet)
+
+        try:
+            await self._socket.send(packet)
+        except websockets.exceptions.ConnectionClosedError as exc:
+            self.logger.error(exc)
+            await self.close()
+            raise NetworkFatalError() from exc
+        except Exception as exc:
+            self.logger.error(exc)
+            await self.close()
+            raise UnhandledException() from exc
+
         self._emit("message_sent", message)
         return message.id_
 
-    async def close(self, silence=False) -> None:
+    async def close(self) -> None:
         """Close the socket service."""
-        exc = SocketClosedException("connections accidentally closed: %s", self._socket.close_sent)
 
         if not self.is_connected:
-            if not silence:
-                raise exc
             return
 
         if self._socket.closed:
             self.logger.info("connections closed: %s", self._socket.close_sent)
-            if not silence:
-                raise exc
             return
 
         await self._socket.close()
-        if not silence:
-            raise exc
 
 
 __all__ = ["SocketService"]
