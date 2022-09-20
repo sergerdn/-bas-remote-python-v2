@@ -37,6 +37,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
     logger: LoggerLike
     port: int
     _task_creator: TaskCreator
+    _lock: asyncio.Lock
 
     def __init__(
         self,
@@ -68,6 +69,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
             self.logger = logging.getLogger("[bas-remote:client]")
 
         self._task_creator = TaskCreator(loop=self._loop)
+        self._lock = asyncio.Lock()
 
     @property
     def is_started(self):
@@ -100,9 +102,12 @@ class BasRemoteClient(AsyncIOEventEmitter):
 
     async def _on_fatal_received(self, exc: Exception) -> None:
         """cancel all tasks, because fatal exception"""
-        for _id, callback in self._requests.items():
-            data = '{"Message":"FunctionFatalError: %s","Result":null,"Success":false}' % exc
-            callback(data)
+        async with self._lock:
+            for _id, callback in self._requests.items():
+                data = '{"Message":"FunctionFatalError: %s","Result":null,"Success":false}' % exc
+                callback(data)
+
+        self._requests.clear()
 
     async def _on_message_received(self, message: Message) -> None:
         self.logger.debug("message received: %s" % message)
@@ -116,11 +121,12 @@ class BasRemoteClient(AsyncIOEventEmitter):
             self._future.set_exception(AuthenticationError())
             self._is_started = False
         elif message.async_ and message.id_:
-            callback = self._requests.pop(message.id_)
-            if message.type_ == "get_global_variable":
-                callback(json.loads(message.data))
-            else:
-                callback(message.data)
+            async with self._lock:
+                callback = self._requests.pop(message.id_)
+                if message.type_ == "get_global_variable":
+                    callback(json.loads(message.data))
+                else:
+                    callback(message.data)
 
     async def _on_socket_open(self) -> None:
         await self._send(
