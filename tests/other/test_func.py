@@ -28,6 +28,7 @@ async def kill_process(working_dir: str) -> bool:
                         break
         if proc_found:
             break
+
     return proc_found
 
 
@@ -114,7 +115,7 @@ class TestFuncMultiple:
         thread = client.create_thread()
         await thread.start()
 
-        assert kill_process(client.options.working_dir) is True
+        assert await kill_process(client.options.working_dir) is True
 
         """because process killed and connection closed"""
         try:
