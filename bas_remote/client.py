@@ -37,7 +37,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
     logger: LoggerLike
     port: int
     _task_creator: TaskCreator
-    _lock: asyncio.Lock
+    _lock_requests: asyncio.Lock
 
     def __init__(
         self,
@@ -69,7 +69,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
             self.logger = logging.getLogger("[bas-remote:client]")
 
         self._task_creator = TaskCreator(loop=self._loop)
-        self._lock = asyncio.Lock()
+        self._lock_requests = asyncio.Lock()
 
     @property
     def is_started(self):
@@ -101,8 +101,8 @@ class BasRemoteClient(AsyncIOEventEmitter):
         await asyncio.wait_for(fut=self._future, timeout=60)
 
     async def _on_fatal_received(self, exc: Exception) -> None:
-        """cancel all tasks, because fatal exception"""
-        async with self._lock:
+        """cancel all tasks, because got fatal exception"""
+        async with self._lock_requests:
             for _id, callback in self._requests.items():
                 data = '{"Message":"FunctionFatalError: %s","Result":null,"Success":false}' % exc
                 callback(data)
@@ -121,7 +121,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
             self._future.set_exception(AuthenticationError())
             self._is_started = False
         elif message.async_ and message.id_:
-            async with self._lock:
+            async with self._lock_requests:
                 callback = self._requests.pop(message.id_)
                 if message.type_ == "get_global_variable":
                     callback(json.loads(message.data))
@@ -207,7 +207,7 @@ class BasRemoteClient(AsyncIOEventEmitter):
         """
         await self.send("stop_thread", {"thread_id": thread_id})
 
-    def create_thread(self, start=False) -> BasThread:
+    def create_thread(self) -> BasThread:
         """Create new BAS thread object.
 
         Returns:
