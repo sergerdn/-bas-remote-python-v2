@@ -13,17 +13,19 @@ from bas_remote.errors import FunctionFatalError
 from bas_remote.runners import BasThread
 
 
-async def kill_process(working_dir: str) -> bool:
+def kill_process(working_dir: str, event_loop: asyncio.AbstractEventLoop) -> bool:
     proc_found = False
     for proc in psutil.process_iter():
         if proc.name() == "FastExecuteScript.exe":
             if working_dir in proc.cmdline()[0]:
                 proc_found = True
                 proc.terminate()
-                with pytest.raises(psutil.NoSuchProcess):
-                    for _ in range(0, 60):
-                        await asyncio.sleep(1)
+                while 1:
+                    event_loop.run_until_complete(asyncio.sleep(1))
+                    try:
                         psutil.Process(pid=proc.pid)
+                    except psutil.NoSuchProcess:
+                        break
         if proc_found:
             break
     return proc_found
@@ -112,7 +114,7 @@ class TestFuncMultiple:
         thread = client.create_thread()
         await thread.start()
 
-        assert await kill_process(client.options.working_dir) is True
+        assert kill_process(client.options.working_dir, event_loop) is True
 
         """because process killed and connection closed"""
         try:
