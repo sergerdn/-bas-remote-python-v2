@@ -108,7 +108,11 @@ class SocketService:
             await self._socket.send(packet)
         except websockets.exceptions.ConnectionClosedError as exc:
             self.logger.error(exc)
-            self._loop.create_task(coro=self.close())
+            await asyncio.gather(self.close(), return_exceptions=False)
+            raise NetworkFatalError() from exc
+        except Exception as exc:
+            self.logger.error(exc)
+            await asyncio.gather(self.close(), return_exceptions=False)
             raise NetworkFatalError() from exc
 
         self._emit("message_sent", message)
