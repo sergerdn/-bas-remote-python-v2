@@ -75,9 +75,9 @@ def exception_handler(f):
             else:
                 f(*args, **kwargs)
         except NetworkFatalError as exc:
-            raise NetworkFatalError from exc
+            raise NetworkFatalError() from exc
         except Exception as exc:
-            raise UnhandledException from exc
+            raise UnhandledException() from exc
 
     return inner_function
 

@@ -9,7 +9,7 @@ from websockets.legacy.client import WebSocketClientProtocol
 from websockets.legacy.client import connect
 from websockets.typing import LoggerLike
 
-from bas_remote.errors import SocketNotConnectedError, NetworkFatalError
+from bas_remote.errors import SocketNotConnectedError, NetworkFatalError, UnhandledException
 from bas_remote.task import TaskCreator
 from bas_remote.types import Message
 
@@ -98,10 +98,10 @@ class SocketService:
                 break
             except ConnectionClosedError as exc:
                 self.logger.error(exc)
-                raise NetworkFatalError from exc
+                raise NetworkFatalError() from exc
             except Exception as exc:
                 self.logger.error(exc)
-                raise NetworkFatalError from exc
+                raise NetworkFatalError() from exc
         self.logger.info("connection closed")
         self._closed()
 
@@ -113,11 +113,11 @@ class SocketService:
         except websockets.exceptions.ConnectionClosedError as exc:
             self.logger.error(exc)
             await asyncio.gather(self.close(), return_exceptions=False)
-            raise NetworkFatalError from exc
+            raise NetworkFatalError() from exc
         except Exception as exc:
             self.logger.error(exc)
             await asyncio.gather(self.close(), return_exceptions=False)
-            raise NetworkFatalError from exc
+            raise UnhandledException() from exc
 
         self._emit("message_sent", message)
         return message.id_
