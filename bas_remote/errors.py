@@ -10,13 +10,6 @@ class SocketNotConnectedError(BasError):
         super().__init__(self._message)
 
 
-class NetworkFatalError(BasError):
-    _message = "Cannot connect to the WebSocket server, connection closed."
-
-    def __init__(self):
-        super().__init__(self._message)
-
-
 class ScriptNotSupportedError(BasError):
     _message = "Script engine not supported (Required 22.4.2 or newer)."
 
@@ -57,6 +50,13 @@ class FunctionError(BasError):
         super().__init__(message)
 
 
+class NetworkFatalError(BasError):
+    _message = "Can not communicate with WebSocket server, connection closed or broken."
+
+    def __init__(self):
+        super().__init__(self._message)
+
+
 __all__ = [
     "SocketNotConnectedError",
     "ScriptNotSupportedError",
@@ -66,4 +66,5 @@ __all__ = [
     "AlreadyRunningError",
     "FunctionError",
     "BasError",
+    "NetworkFatalError",
 ]

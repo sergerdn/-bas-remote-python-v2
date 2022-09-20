@@ -94,10 +94,14 @@ class SocketService:
             try:
                 data = await self._socket.recv()
                 self._process_data(data)
-            except ConnectionClosedError:
-                break
             except ConnectionClosedOK:
                 break
+            except ConnectionClosedError as exc:
+                self.logger.error(exc)
+                raise NetworkFatalError from exc
+            except Exception as exc:
+                self.logger.error(exc)
+                raise NetworkFatalError from exc
         self.logger.info("connection closed")
         self._closed()
 
