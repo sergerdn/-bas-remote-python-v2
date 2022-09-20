@@ -39,10 +39,10 @@ class BasRemoteClient(AsyncIOEventEmitter):
     _task_creator: TaskCreator
 
     def __init__(
-            self,
-            options: Options,
-            loop: Optional[asyncio.AbstractEventLoop] = None,
-            logger: Optional[LoggerLike] = None,
+        self,
+        options: Options,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+        logger: Optional[LoggerLike] = None,
     ):
         """Create an instance of BasRemoteClient class.
 
