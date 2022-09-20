@@ -71,9 +71,9 @@ def exception_handler(f):
     async def inner_function(*args, **kwargs):
         try:
             if inspect.iscoroutinefunction(f):
-                await f(*args, **kwargs)
+                return await f(*args, **kwargs)
             else:
-                f(*args, **kwargs)
+                return f(*args, **kwargs)
         except NetworkFatalError as exc:
             raise NetworkFatalError() from exc
         except Exception as exc:

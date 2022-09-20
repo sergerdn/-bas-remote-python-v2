@@ -89,6 +89,7 @@ class TestFuncMultiple:
 
         await client.start()
         thread = client.create_thread()
+        await thread.run_function("CheckIpJson")
 
         proc_found = False
         for proc in psutil.process_iter():
